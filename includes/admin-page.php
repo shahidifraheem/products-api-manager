@@ -16,11 +16,17 @@ function products_manager_panel_page()
     <div class="wrap">
         <h1>Products Manager By API</h1>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post">
             <!-- Product API Url -->
             <div class="input-box">
-                <label for="product_api_url">Product API Url</label><br>
-                <input type="url" name="product_api_url" id="product_api_url" style="width: 100%; max-width: 500px" value="<?= esc_url(get_option('manage_product_api_url')); ?>" />
+                <h3><label for="product_api_url">Product API Url</label></h3>
+                <input type="url" name="product_api_url" id="product_api_url" value="<?= esc_url(get_option('manage_product_api_url')); ?>" />
+            </div>
+            <h4>OR</h4>
+            <!-- Product API Code -->
+            <div class="input-box">
+                <h3><label for="product_api_code">Paste the CSV Code</label></h3>
+                <textarea name="product_api_code" id="product_api_code" value="<?= get_option('manage_product_api_code'); ?>" cols="30" rows="15"></textarea>
             </div>
             <br>
             <!-- Save Button -->
@@ -35,16 +41,31 @@ function products_manager_panel_page()
         </h3>
 
         <div class="tab-content active" id="tab1">
-            <h4>
-                <label for="available">Available products in Api and Store:</label>
-            </h4>
-            <div id="available-box">
-                <select name="available" id="available" multiple></select>
-            </div>
+            <form method="post">
+                <h4>
+                    <label for="available">Available products in Api and Store:</label>
+                </h4>
+                <div id="available-box">
+                    <select name="available[]" id="available" multiple></select>
+                </div>
+                <div id="prices-box">
+                    <h4>
+                        <label for="price-increase">Increase available products price by:</label>
+                    </h4>
+                    <select name="price-increase" id="price-increase">
+                        <option value="">Select Price</option>
+                        <option value="1.5">150%</option>
+                        <option value="2">200%</option>
+                        <option value="3">300%</option>
+                    </select>
+                </div>
+                <br>
+                <button onclick="return window.confirm('Are you sure you want to increase the prices of selected products?')" name="save_price_increase_theme_options" class="button-primary">Update Prices</button>
+            </form>
         </div>
 
         <div class="tab-content" id="tab2">
-            <form action="">
+            <form method="post">
                 <h4>
                     <label for="missing">Missing products in our Store:</label>
                 </h4>
@@ -52,66 +73,39 @@ function products_manager_panel_page()
                     <select name="missing" id="missing" multiple></select>
                 </div>
                 <br>
-                <button class="button-primary">Add Missing Products</button>
+                <button onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
             </form>
         </div>
 
         <div class="tab-content" id="tab3">
-            <form action="">
+            <form method="post">
                 <h4>
                     <label for="discontinued">Out of Stock Products in Live:</label>
                 </h4>
                 <div id="discontinued-box">
-                    <select name="discontinued" id="discontinued" multiple></select>
+                    <select name="discontinued[]" id="discontinued" multiple></select>
                 </div>
                 <br>
-                <button class="button-primary">Also Update Store Products</button>
+                <button onclick="return window.confirm('Are you sure you want to update the products status of draft?')" name="save_discontinued_theme_options" class="button-primary">Also Update Store Products</button>
             </form>
         </div>
-    <?php }
 
 
-function fecth_api_manager_code()
-{
-    $args = array(
-        'post_type'      => 'product',
-        'posts_per_page' => -1, // Retrieve all products, you can adjust this number as needed
-    );
-    $products = get_posts($args);
-
-    // echo $json_data;
-    function get_product_titles_as_csv()
-    {
-        $args = array(
-            'post_type'      => 'product', // Change to your custom post type or WooCommerce product type
-            'posts_per_page' => -1
-        );
-
-        $products = get_posts($args);
-
-        $csv_data = "title\n";
-
-        foreach ($products as $product) {
-            $product_title = $product->post_title;
-
-            // Add product title to CSV string
-            $csv_data .= "\"$product_title\"\n";
-        }
-
-        return $csv_data;
-    }
-
-    // Get product titles as CSV data
-    $csv_data = get_product_titles_as_csv();
-
-
-    $api_url = esc_url(plugins_url() . "/products-manager/includes/apis/general-api.csv");
-    $api_content = file_get_contents($api_url);
-    ?>
         <style>
-            select {
+            select:not(#price-increase),
+            textarea {
                 min-width: 600px;
                 min-height: 500px !important;
+            }
+
+            input,
+            textarea {
+                width: 100%;
+                max-width: 700px;
+            }
+
+            input[type="submit"] {
+                width: auto;
             }
 
             .tab-content {
@@ -122,6 +116,45 @@ function fecth_api_manager_code()
                 display: block;
             }
         </style>
+    <?php }
+
+
+function fecth_api_manager_code()
+{
+    function get_product_data_as_csv()
+    {
+        $args = array(
+            'post_type'      => 'product',
+            'posts_per_page' => -1
+        );
+
+        $products = get_posts($args);
+
+        $csv_data = "ID,title,price\n";
+
+        foreach ($products as $product) {
+            $product_id = $product->ID;
+            $product_title = $product->post_title;
+
+            // Get product price (assuming it's stored as post meta with key 'price')
+            $product_price = get_post_meta($product_id, '_price', true);
+
+            // Add product ID, title, and price to CSV string
+            $csv_data .= "$product_id,\"$product_title\",$product_price\n";
+        }
+
+        return $csv_data;
+    }
+
+    // Get products data as CSV format
+    $csv_data = get_product_data_as_csv();
+
+    $api_url = esc_url(plugins_url() . "/products-manager/includes/apis/general-api.csv");
+    $api_content = file_get_contents($api_url);
+    if ($api_content == "") {
+        $api_content = get_option('manage_product_api_code');
+    }
+    ?>
         <script>
             // JavaScript code to fetch CSV data and convert it to an object
             document.addEventListener("DOMContentLoaded", function() {
@@ -137,8 +170,8 @@ function fecth_api_manager_code()
                     return slug;
                 }
 
-                // Replace 'your_csv_data' with the actual CSV data
-                var csvData = `<?= $api_content ?>`;
+                // Store csv data from php variable to js variable
+                const csvData = `<?= $api_content ?>`;
 
                 // Function to convert CSV data to an array of objects
                 function csvToObjectArray(csvData) {
@@ -167,36 +200,27 @@ function fecth_api_manager_code()
 
                 // Call the function with your CSV data
                 const api_array = csvToObjectArray(csvData);
-
-                for (let i = 0; i < api_array.length; i++) {
-                    // api_array = api_array[i];
-                }
-                console.log(api_array)
-
-                console.log("---------------- Divider ----------------")
+                console.log("API Array: ", api_array)
 
                 const products_array = csvToObjectArray(`<?= $csv_data ?>`);
-                for (let i = 0; i < products_array.length; i++) {
-                    // products_array = products_array[i];
-                }
-                console.log(products_array)
+                console.log("Product Array: ", products_array)
 
                 // Function to find common sub-arrays based on a specific property
-                function findCommonSubArrays(apiArray, productsArray, api_property, product_property) {
+                function common_products(apiArray, productsArray, api_property, product_property) {
                     return apiArray.filter(apiObj =>
                         productsArray.some(productsObj => apiObj[api_property] === productsObj[product_property])
                     );
                 }
 
-                // Common Products - Available
-                const available_products = findCommonSubArrays(api_array, products_array, 'title', 'title');
+                // Common Products from APi and Store - Available
+                const available_products = common_products(products_array, api_array, 'title', 'title');
                 console.log('Common Sub-Arrays:', available_products);
 
                 const available = document.querySelector("#available");
                 available.innerHTML = "";
                 available_products.forEach(product => {
                     available.innerHTML += `
-                        <option value="${generate_slug(product.title)}">${product.title}</option>
+                        <option value="${product.ID}">${product.title} -> ${product.price}</option>
                 `;
                 });
 
@@ -209,22 +233,26 @@ function fecth_api_manager_code()
                 missing.innerHTML = "";
                 missing_products.forEach(product => {
                     missing.innerHTML += `
-                        <option value="${generate_slug(product.title)}">${product.title}</option>
+                        <option value="${generate_slug(product.title)}">${product.title} -> ${product.price}</option>
                         `;
                 });
                 console.log('Items only in api_array:', missing_products);
 
-                // Products out of stock in Live Api - Discontinued
-                const products_stock_out = api_array.filter(product => product['Quantity'] < 1);
 
+                // Common Products from APi and Store - Available
+                const available_common_products = common_products(api_array, products_array, 'title', 'title');
+                console.log('Common Sub-Arrays:', available_common_products);
+                const products_stock_out = available_common_products.filter(product => product['Quantity'] < 1);
+
+                // Products out of stock in Live Api - Discontinued
                 const discontinued = document.querySelector("#discontinued");
                 discontinued.innerHTML = "";
                 products_stock_out.forEach(product => {
                     discontinued.innerHTML += `
-                        <option value="${generate_slug(product.title)}">${product.title}</option>
+                        <option value="${product.title}">${product.title} -> ${product.price}</option>
                         `;
                 });
-                console.log('Products with In stock equal to 0:', products_stock_out);
+                console.log('Products with out of stock:', products_stock_out);
             });
         </script>
 
@@ -252,5 +280,4 @@ function fecth_api_manager_code()
             });
         </script>
     <?php }
-add_action('admin_head', 'fecth_api_manager_code');
-    ?>
+add_action('admin_head', 'fecth_api_manager_code'); ?>
