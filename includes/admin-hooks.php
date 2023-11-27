@@ -118,9 +118,10 @@ function update_discontinued_products()
 
         $discontinued_products = $_POST['discontinued'];
 
-        // Loop through selected products
+        // Check the discontinued is empty or not
         if (!empty($discontinued_products)) {
 
+            // Loop through the discontinued products to update the titles
             foreach ($discontinued_products as $product_title) {
                 global $wpdb;
 
@@ -140,3 +141,44 @@ function update_discontinued_products()
 }
 
 add_action('admin_init', 'update_discontinued_products');
+
+/**
+ * Update discontinuted selected products status to draft
+ *
+ * @return void
+ */
+function update_missing_products()
+{
+    if (isset($_POST['save_missing_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
+
+        $missing_products = $_POST['missing'];
+
+        // Check the missing is empty or not
+        if (!empty($missing_products)) {
+
+            foreach ($missing_products as $product_title) {
+                $product_data = array(
+                    'post_type' => 'product', // Specify post type as 'product'
+                    'post_title' => $product_title, // Product title
+                    'post_content' => '', // Add product description
+                    'post_status' => 'publish', // Post status as 'publish'
+                    'meta_input' => array(
+                        '_price' => 0, // Product price
+                        '_sku' => '', // Product SKU
+                        '_stock_quantity' => 0, // Product stock quantity
+                    )
+                );
+                $product = wp_insert_post($product_data);
+
+                // Update content from Database if file updated successfully
+                if ($product) {
+                    echo '<script>alert("Product published successfully!")</script>';
+                } else {
+                    echo '<script>alert("Failed to publish the product.")</script>';
+                }
+            }
+        }
+    }
+}
+
+add_action('admin_init', 'update_missing_products');

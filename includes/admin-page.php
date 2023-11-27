@@ -73,7 +73,7 @@ function products_manager_panel_page()
                     <select name="missing[]" id="missing" multiple></select>
                 </div>
                 <br>
-                <button onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
+                <button name="save_missing_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
             </form>
         </div>
 
@@ -198,9 +198,11 @@ function fecth_api_manager_code()
                             obj[header] = values[index];
                         });
 
+                        // Returning the object
                         return obj;
                     });
 
+                    // Returning the 
                     return result;
                 }
 
@@ -221,7 +223,6 @@ function fecth_api_manager_code()
 
                 // Common Products from APi and Store - Available
                 const available_products = common_products(products_array, api_array, 'title', 'title');
-                console.log('Common Sub-Arrays:', available_products);
 
                 const available = document.querySelector("#available");
                 available.innerHTML = "";
@@ -240,15 +241,13 @@ function fecth_api_manager_code()
                 missing.innerHTML = "";
                 missing_products.forEach(product => {
                     missing.innerHTML += `
-                        <option value="${generate_slug(product.title)}">${product.title} -> ${product.price}</option>
+                        <option value="${product.title} -> Description: ${product.description} -> Price: ${product.price} -> Sale Price: ${product.sale_price} -> Quantity: ${product.Quantity} -> SKU: ${product.SKU} -> size: ${product.size} -> shipping_height: ${product.shipping_height} -> shipping_length: ${product.shipping_length} -> shipping_weight: ${product.shipping_weight} -> shipping_width: ${product.shipping_width}">${product.title} -> ${product.price}</option>
                         `;
                 });
-                console.log('Items only in api_array:', missing_products);
-
+                console.log('Missing Products:', missing_products);
 
                 // Common Products from APi and Store - Available
                 const available_common_products = common_products(api_array, products_array, 'title', 'title');
-                console.log('Common Sub-Arrays:', available_common_products);
                 const products_stock_out = available_common_products.filter(product => product['Quantity'] < 1);
 
                 // Products out of stock in Live Api - Discontinued
@@ -270,8 +269,6 @@ function fecth_api_manager_code()
                         `;
                     }
                 });
-
-                console.log('Products with out of stock:', products_stock_out);
             });
         </script>
 
