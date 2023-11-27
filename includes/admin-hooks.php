@@ -14,7 +14,7 @@ add_action('admin_menu', 'products_manager_panel_menu');
 
 /**
  * Manage the products theme panel page data from the admin panel
- *
+ * 
  * This will store the data into database after satitization and validation
  * 
  * @return void
@@ -25,8 +25,9 @@ function products_manager_save_settings()
         $product_api_url_value = "";
         $product_api_code_value = "";
 
-        // Products manager api validation
+        // Api validation
         if (isset($_POST['product_api_url']) || isset($_POST['product_api_code'])) {
+            // Check wether the api coming from url or textarea
             if ($_POST['product_api_url'] != "") {
                 $product_api_url_value = filter_var($_POST['product_api_url'], FILTER_SANITIZE_URL);
                 $api_content = file_get_contents($product_api_url_value);
@@ -40,6 +41,8 @@ function products_manager_save_settings()
 
             // Specify the local file path within the plugin directory
             $local_api_path = $plugin_dir . "apis/general-api.csv";
+
+            // Local api file content
             $local_api_content = file_get_contents($local_api_path);
 
             if ($api_content !== false) {
@@ -49,7 +52,9 @@ function products_manager_save_settings()
                 // Write the updated content back to the file
                 $result = file_put_contents($local_api_path, $updated_content);
 
+                // Update content from Database if file updated successfully
                 if ($result !== false) {
+                    // Update database value based on the coming content type
                     if ($_POST['product_api_url'] != "") {
                         update_option('manage_product_api_url', $product_api_url_value);
                         update_option('manage_product_api_code', "");
@@ -59,7 +64,7 @@ function products_manager_save_settings()
                     }
                     echo '<script>alert("API updated successfully!")</script>';
                 } else {
-                    echo '<script>alert("Error writing to the file.")</script>';
+                    echo '<script>alert("Failed to update the file.")</script>';
                 }
             }
         }
@@ -68,7 +73,11 @@ function products_manager_save_settings()
 
 add_action('admin_init', 'products_manager_save_settings');
 
-// Function to update product prices by 200%
+/**
+ * Update products prices by 150%, 200%, 300%
+ *
+ * @return void
+ */
 function update_product_prices()
 {
     if (isset($_POST['save_price_increase_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
@@ -83,11 +92,14 @@ function update_product_prices()
                 // Get current price
                 $current_price = get_post_meta($available_id, '_price', true);
 
-                // Update price by 150-300%
-                $new_price = $current_price * $price_increase;
+                // Update price if price is valid 
+                if ($current_price != "") {
+                    // Update price by 150-300%
+                    $new_price = $current_price * $price_increase;
 
-                // Update post meta with the new price
-                update_post_meta($available_id, '_price', $new_price);
+                    // Update post price with the new price
+                    update_post_meta($available_id, '_price', $new_price);
+                }
             }
         }
     }
@@ -95,29 +107,33 @@ function update_product_prices()
 
 add_action('admin_init', 'update_product_prices');
 
-// Function to update product prices by 200%
+/**
+ * Update discontinuted selected products status to draft
+ *
+ * @return void
+ */
 function update_discontinued_products()
 {
     if (isset($_POST['save_discontinued_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
 
         $discontinued_products = $_POST['discontinued'];
 
-        // Loop through products
+        // Loop through selected products
         if (!empty($discontinued_products)) {
+
             foreach ($discontinued_products as $product_title) {
+                global $wpdb;
 
-                // Check if a product with the given title exists
-                $product = get_page_by_title($product_title, OBJECT, 'product');
+                // Update the post status with custom query
+                $query = $wpdb->prepare(
+                    "UPDATE {$wpdb->posts}
+                    SET post_status = %s
+                    WHERE post_title = %s",
+                    "draft",
+                    $product_title
+                );
 
-                if ($product && $product->post_type === 'product') {
-                    // Update the product status to 'draft'
-                    $updated_post = array(
-                        'ID'          => $product->ID,
-                        'post_status' => 'draft',
-                    );
-
-                    wp_update_post($updated_post);
-                }
+                $wpdb->query($query);
             }
         }
     }

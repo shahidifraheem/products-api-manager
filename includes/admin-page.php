@@ -70,7 +70,7 @@ function products_manager_panel_page()
                     <label for="missing">Missing products in our Store:</label>
                 </h4>
                 <div id="missing-box">
-                    <select name="missing" id="missing" multiple></select>
+                    <select name="missing[]" id="missing" multiple></select>
                 </div>
                 <br>
                 <button onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
@@ -86,12 +86,12 @@ function products_manager_panel_page()
                     <select name="discontinued[]" id="discontinued" multiple></select>
                 </div>
                 <br>
-                <button onclick="return window.confirm('Are you sure you want to update the products status of draft?')" name="save_discontinued_theme_options" class="button-primary">Also Update Store Products</button>
+                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will update to draft?')" name="save_discontinued_theme_options" class="button-primary">Also Update Store Products</button>
             </form>
         </div>
 
-
         <style>
+            /* Styling for Tabs */
             select:not(#price-increase),
             textarea {
                 min-width: 600px;
@@ -119,6 +119,11 @@ function products_manager_panel_page()
     <?php }
 
 
+/**
+ * Embed JavaScript code inside in the head tag
+ *
+ * @return void
+ */
 function fecth_api_manager_code()
 {
     function get_product_data_as_csv()
@@ -151,12 +156,14 @@ function fecth_api_manager_code()
 
     $api_url = esc_url(plugins_url() . "/products-manager/includes/apis/general-api.csv");
     $api_content = file_get_contents($api_url);
+
+    // If file return empty content then override with the texarea content
     if ($api_content == "") {
         $api_content = get_option('manage_product_api_code');
     }
     ?>
         <script>
-            // JavaScript code to fetch CSV data and convert it to an object
+            // Manage tabs content
             document.addEventListener("DOMContentLoaded", function() {
 
                 function generate_slug(title) {
@@ -247,16 +254,29 @@ function fecth_api_manager_code()
                 // Products out of stock in Live Api - Discontinued
                 const discontinued = document.querySelector("#discontinued");
                 discontinued.innerHTML = "";
+
+                // Use a Set to store unique product titles
+                const uniqueTitles = new Set();
+
                 products_stock_out.forEach(product => {
-                    discontinued.innerHTML += `
-                        <option value="${product.title}">${product.title} -> ${product.price}</option>
+                    // Check if the product title is not already in the set
+                    if (!uniqueTitles.has(product.title)) {
+                        // Add the product title to the set
+                        uniqueTitles.add(product.title);
+
+                        // Render the option
+                        discontinued.innerHTML += `
+                            <option value="${product.title}">${product.title}</option>
                         `;
+                    }
                 });
+
                 console.log('Products with out of stock:', products_stock_out);
             });
         </script>
 
         <script>
+            // Manage tabs navigation
             jQuery(document).ready(function($) {
                 // Handle tab clicks
                 $('.nav-tab').on('click', function(e) {
