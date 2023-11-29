@@ -19,6 +19,9 @@ if (!defined('ABSPATH')) {
 // Include the admin panel page
 require_once plugin_dir_path(__FILE__) . 'includes/admin-page.php';
 
+// Include the admin discontinued panel page
+require_once plugin_dir_path(__FILE__) . 'includes/admin-discontinued-page.php';
+
 // Include the admin hooks
 require_once plugin_dir_path(__FILE__) . 'includes/admin-hooks.php';
 

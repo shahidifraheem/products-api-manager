@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
  * 
  * @return PANEL_HTML_TEMPLATE
  */
-function products_manager_panel_page()
+function products_manager_discontinued_page()
 {
 ?>
     <div class="wrap">
@@ -35,58 +35,19 @@ function products_manager_panel_page()
         <br>
 
         <h3 class="nav-tab-wrapper">
-            <a href="#available" class="nav-tab nav-tab-active" data-tab="tab1">Available</a>
-            <a href="#missing" class="nav-tab" data-tab="tab2">Missing</a>
-            <a href="#discontinued" class="nav-tab" data-tab="tab3">Discontinued</a>
+            <a href="#discontinued" class="nav-tab nav-tab-active" data-tab="tab">discontinued</a>
         </h3>
 
-        <div class="tab-content active" id="tab1">
+        <div class="tab-content" id="tab">
             <form method="post">
                 <h4>
-                    <label for="available">Available products in Api and Store:</label>
-                </h4>
-                <div id="available-box">
-                    <select name="available[]" id="available" multiple></select>
-                </div>
-                <div id="prices-box">
-                    <h4>
-                        <label for="price-increase">Increase available products price by:</label>
-                    </h4>
-                    <select name="price-increase" id="price-increase">
-                        <option value="">Select Price</option>
-                        <option value="1.5">150%</option>
-                        <option value="2">200%</option>
-                        <option value="3">300%</option>
-                    </select>
-                </div>
-                <br>
-                <button onclick="return window.confirm('Are you sure you want to increase the prices of selected products?')" name="save_price_increase_theme_options" class="button-primary">Update Prices</button>
-            </form>
-        </div>
-
-        <div class="tab-content" id="tab2">
-            <form method="post">
-                <h4>
-                    <label for="missing">Missing products in our Store:</label>
-                </h4>
-                <div id="missing-box">
-                    <select name="missing[]" id="missing" multiple></select>
-                </div>
-                <br>
-                <button name="save_missing_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
-            </form>
-        </div>
-
-        <div class="tab-content" id="tab3">
-            <form method="post">
-                <h4>
-                    <label for="discontinued">Out of Stock Products in Live:</label>
+                    <label for="discontinued">Discontinued products in our Store:</label>
                 </h4>
                 <div id="discontinued-box">
-                    <select name="discontinued[]" id="discontinued" multiple></select>
+                    <select name="discontinued[]" id="discontinued-api" multiple></select>
                 </div>
                 <br>
-                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will update to draft?')" name="save_discontinued_theme_options" class="button-primary">Also Update Store Products</button>
+                <button name="save_discontinued_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
             </form>
         </div>
 
@@ -107,14 +68,6 @@ function products_manager_panel_page()
             input[type="submit"] {
                 width: auto;
             }
-
-            .tab-content {
-                display: none;
-            }
-
-            .tab-content.active {
-                display: block;
-            }
         </style>
     <?php }
 
@@ -124,9 +77,9 @@ function products_manager_panel_page()
  *
  * @return void
  */
-function fecth_api_manager_code()
+function fecth_api_discontinued_code()
 {
-    function get_product_data_as_csv()
+    function get_discontinued_product_data_as_csv()
     {
         $args = array(
             'post_type'      => 'product',
@@ -152,7 +105,7 @@ function fecth_api_manager_code()
     }
 
     // Get products data as CSV format
-    $csv_data = get_product_data_as_csv();
+    $csv_data = get_discontinued_product_data_as_csv();
 
     $api_url = esc_url(plugins_url() . "/products-manager/includes/apis/general-api.csv");
     $api_content = file_get_contents($api_url);
@@ -221,29 +174,6 @@ function fecth_api_manager_code()
                 }
 
                 // Common Products from APi and Store - Available
-                const available_products = common_products(products_array, api_array, 'title', 'title');
-
-                const available = document.querySelector("#available");
-                available.innerHTML = "";
-                available_products.forEach(product => {
-                    available.innerHTML += `
-                        <option value="${product.ID}">${product.title} -> ${product.price}</option>
-                `;
-                });
-
-                // Products only available in Live Api - Missing
-                const missing_products = api_array.filter(apiItem =>
-                    !products_array.some(productItem => productItem.title === apiItem.title)
-                );
-
-                const missing = document.querySelector("#missing");
-                missing.innerHTML = "";
-                missing_products.forEach(product => {
-                    missing.innerHTML += `<option value="::>${product.title}::>${product.description}::>${product['Product Category']}::>${product.price}::>${product.sale_price}::>${product.Quantity}::>${product.SKU}::>${product.size}::>${product.shipping_height}::>${product.shipping_length}::>${product.shipping_weight}::>${product.shipping_width}">${product.title} -> ${product.price}</option>`;
-                });
-                console.log('Missing Products: ', missing_products);
-
-                // Common Products from APi and Store - Available
                 const available_common_products = common_products(api_array, products_array, 'title', 'title');
                 const products_stock_out = available_common_products.filter(product => product['Quantity'] < 1);
 
@@ -268,30 +198,5 @@ function fecth_api_manager_code()
                 });
             });
         </script>
-
-        <script>
-            // Manage tabs navigation
-            jQuery(document).ready(function($) {
-                // Handle tab clicks
-                $('.nav-tab').on('click', function(e) {
-                    e.preventDefault();
-
-                    // Get the data-tab attribute value
-                    var tabId = $(this).data('tab');
-
-                    // Hide all tab contents
-                    $('.tab-content').removeClass('active');
-
-                    // Show the selected tab content
-                    $('#' + tabId).addClass('active');
-
-                    // Remove active class from all tabs
-                    $('.nav-tab').removeClass('nav-tab-active');
-
-                    // Add active class to the clicked tab
-                    $(this).addClass('nav-tab-active');
-                });
-            });
-        </script>
     <?php }
-add_action('admin_head', 'fecth_api_manager_code'); ?>
+add_action('admin_head', 'fecth_api_discontinued_code'); ?>

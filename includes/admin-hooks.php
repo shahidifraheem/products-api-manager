@@ -7,9 +7,27 @@
  */
 function products_manager_panel_menu()
 {
-    add_menu_page('Products Manager Panel', 'Products Panel', 'manage_options', 'products-manager-panel', 'products_manager_panel_page', 'dashicons-products');
+    add_menu_page(
+        'Products Manager Panel',
+        'Products Panel',
+        'manage_options',
+        'products-manager-panel',
+        'products_manager_panel_page',
+        'dashicons-products'
+    );
+
+    // Add Discontinued Api
+    add_submenu_page(
+        'products-manager-panel',  // Parent menu slug
+        'Discontinued Panel',            // Page title
+        'Discontinued Panel',                 // Menu title
+        'manage_options',
+        'products-discontinued-panel',   // discontinued slug
+        'products_manager_discontinued_page'
+    );
 }
-// Hook to add the admin page.
+
+// Hook to add the admin page and submenu
 add_action('admin_menu', 'products_manager_panel_menu');
 
 /**
@@ -144,7 +162,7 @@ add_action('admin_init', 'update_discontinued_products');
 
 /**
  * Update discontinuted selected products status to draft
- *
+ * 
  * @return void
  */
 function update_missing_products()
@@ -153,19 +171,30 @@ function update_missing_products()
 
         $missing_products = $_POST['missing'];
 
+        echo "<pre>";
+        var_dump($missing_products);
+        echo "</pre>";
+
         // Check the missing is empty or not
         if (!empty($missing_products)) {
 
             foreach ($missing_products as $product_title) {
+                // Split the string into an array using the comma as the delimiter
+                $array = explode('::>', $product_title);
+
+                foreach ($array as $value) {
+                    echo $value . "<br>";
+                }
+                die;
                 $product_data = array(
                     'post_type' => 'product', // Specify post type as 'product'
-                    'post_title' => $product_title, // Product title
-                    'post_content' => '', // Add product description
+                    'post_title' => $product_title, // Title
+                    'post_content' => '', // Add description
                     'post_status' => 'publish', // Post status as 'publish'
                     'meta_input' => array(
-                        '_price' => 0, // Product price
-                        '_sku' => '', // Product SKU
-                        '_stock_quantity' => 0, // Product stock quantity
+                        '_price' => 0, // Price
+                        '_sku' => '', // SKU
+                        '_stock_quantity' => 0, // stock quantity
                     )
                 );
                 $product = wp_insert_post($product_data);
