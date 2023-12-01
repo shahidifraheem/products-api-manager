@@ -107,7 +107,7 @@ function fecth_api_discontinued_code()
     // Get products data as CSV format
     $csv_data = get_discontinued_product_data_as_csv();
 
-    $api_url = esc_url(plugins_url() . "/products-manager/includes/apis/general-api.csv");
+    $api_url = esc_url(plugins_url() . "/products-api-manager/includes/apis/general-api.csv");
     $api_content = file_get_contents($api_url);
 
     // If file return empty content then override with the texarea content
