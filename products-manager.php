@@ -2,12 +2,10 @@
 
 /*
  * Plugin Name:       Products Manager
- * Plugin URI:        https://wickedlace.com/
  * Description:       This plugin will handle the products through the apis
  * Version:           1.0
- * Author:            Wicked Lace
- * Author URI:        https://wickedlace.com/
- * Update URI:        https://wickedlace.com/wickedlace-panel/
+ * Author:            Shahid Ifraheem
+ * Author URI:        https://www.linkedin.com/in/shahid-ifraheem/
  * Text Domain:       products-manager
  */
 

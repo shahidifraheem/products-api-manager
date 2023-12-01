@@ -239,7 +239,7 @@ function fecth_api_manager_code()
                 const missing = document.querySelector("#missing");
                 missing.innerHTML = "";
                 missing_products.forEach(product => {
-                    missing.innerHTML += `<option value="::>${product.title}::>${product.description}::>${product['Product Category']}::>${product.price}::>${product.sale_price}::>${product.Quantity}::>${product.SKU}::>${product.size}::>${product.shipping_height}::>${product.shipping_length}::>${product.shipping_weight}::>${product.shipping_width}">${product.title} -> ${product.price}</option>`;
+                    missing.innerHTML += `<option value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product['Product Category'] != "" ? product['Product Category'] : "null"}::>${product.price != "" ? product.price : "null"}::>${product.sale_price != "" ? product.sale_price : "null"}::>${product.Quantity != "" ? product.Quantity : "null"}::>${product.SKU != "" ? product.SKU : "null"}::>${product.size != "" ? product.size : "null"}::>${product.color != "" ? product.color : "null"}::>${product.brand != "" ? product.brand : "null"}::>${product.UPC != "" ? product.UPC : "null"}::>${product.shipping_weight != "" ? product.shipping_weight : "null"}::>${product.shipping_height != "" ? product.shipping_height : "null"}::>${product.shipping_length != "" ? product.shipping_length : "null"}::>${product.shipping_width != "" ? product.shipping_width : "null"}::>${product.image_link != "" ? product.image_link : "null"}">${product.title} -> ${product.price}</option>`;
                 });
                 console.log('Missing Products: ', missing_products);
 
@@ -255,6 +255,7 @@ function fecth_api_manager_code()
                 const uniqueTitles = new Set();
 
                 products_stock_out.forEach(product => {
+
                     // Check if the product title is not already in the set
                     if (!uniqueTitles.has(product.title)) {
                         // Add the product title to the set

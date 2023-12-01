@@ -138,26 +138,35 @@ function update_discontinued_products()
 
         // Check the discontinued is empty or not
         if (!empty($discontinued_products)) {
-
             // Loop through the discontinued products to update the titles
             foreach ($discontinued_products as $product_title) {
-                global $wpdb;
 
-                // Update the post status with custom query
-                $query = $wpdb->prepare(
-                    "UPDATE {$wpdb->posts}
-                    SET post_status = %s
-                    WHERE post_title = %s",
-                    "draft",
-                    $product_title
-                );
+                // Query for the product by title
+                $product_query = new WP_Query(array(
+                    'post_type' => 'product',
+                    'posts_per_page' => -1,
+                    'post_status' => 'publish',
+                    'title' => $product_title,
+                ));
 
-                $wpdb->query($query);
+                // Check if the product is found
+                if ($product_query->have_posts()) {
+                    while ($product_query->have_posts()) {
+                        $product_query->the_post();
+
+                        // Update the product stock status to 'outofstock'
+                        update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
+
+                        // Optionally, update the product quantity to 0
+                        update_post_meta(get_the_ID(), '_stock', 0);
+
+                        echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
+                    }
+                }
             }
         }
     }
 }
-
 add_action('admin_init', 'update_discontinued_products');
 
 /**
@@ -165,49 +174,147 @@ add_action('admin_init', 'update_discontinued_products');
  * 
  * @return void
  */
-function update_missing_products()
+function add_missing_products()
 {
     if (isset($_POST['save_missing_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
 
         $missing_products = $_POST['missing'];
 
-        echo "<pre>";
-        var_dump($missing_products);
-        echo "</pre>";
-
         // Check the missing is empty or not
         if (!empty($missing_products)) {
 
-            foreach ($missing_products as $product_title) {
+            // Loop through the missing products
+            foreach ($missing_products as $product_api_data) {
                 // Split the string into an array using the comma as the delimiter
-                $array = explode('::>', $product_title);
+                $product_array = explode('::>', $product_api_data);
 
-                foreach ($array as $value) {
-                    echo $value . "<br>";
-                }
-                die;
-                $product_data = array(
-                    'post_type' => 'product', // Specify post type as 'product'
-                    'post_title' => $product_title, // Title
-                    'post_content' => '', // Add description
-                    'post_status' => 'publish', // Post status as 'publish'
-                    'meta_input' => array(
-                        '_price' => 0, // Price
-                        '_sku' => '', // SKU
-                        '_stock_quantity' => 0, // stock quantity
-                    )
-                );
-                $product = wp_insert_post($product_data);
+                // echo "<pre>";
+                // var_dump($product_array);
+                // echo "</pre>";
+                // die;
 
-                // Update content from Database if file updated successfully
-                if ($product) {
-                    echo '<script>alert("Product published successfully!")</script>';
-                } else {
-                    echo '<script>alert("Failed to publish the product.")</script>';
+                // Insert product if title is not empty
+                if ($product_array[1] != "null") {
+                    $product_data = array(
+                        'post_type' => 'product',
+                        'post_title' => $product_array[1],
+                        'post_content' => '',
+                        'post_status' => 'publish',
+                    );
+
+                    $product_id = wp_insert_post($product_data);
+
+                    if ($product_array[16] != "") {
+                        $image_url = filter_var($product_array[16], FILTER_SANITIZE_URL);
+
+                        // Download the image
+                        $response = wp_remote_get($image_url);
+
+                        // Check if the request was successful
+                        if (!is_wp_error($response)) {
+                            $response_code = wp_remote_retrieve_response_code($response);
+
+                            // Check if the response code is 200 OK
+                            if ($response_code === 200) {
+                                // Get the image body
+                                $image_data = wp_remote_retrieve_body($response);
+
+                                // Get the filename from the URL
+                                $filename = basename($image_url);
+
+                                // Upload the image to the media library
+                                $upload = wp_upload_bits($filename, null, $image_data);
+
+                                // Check if the upload was successful
+                                if (!$upload['error']) {
+                                    // Get the uploaded image path
+                                    $uploaded_image_path = $upload['file'];
+
+                                    // Set the uploaded image as the featured image for the product
+                                    $attachment_id = wp_insert_attachment(array(
+                                        'post_title' => $filename,
+                                        'post_mime_type' => 'image/jpeg', // Change this based on the image type
+                                        'post_status' => 'inherit',
+                                    ), $uploaded_image_path, $product_id);
+
+                                    // Set the featured image
+                                    set_post_thumbnail($product_id, $attachment_id);
+                                } else {
+                                    echo 'Failed to upload image. Error: ' . $upload['error'];
+                                }
+                            } else {
+                                echo 'Invalid response code: ' . $response_code;
+                            }
+                        } else {
+                            // Print WP_Error message
+                            echo 'Invalid response. Error: ' . $response->get_error_message();
+                        }
+                    }
+
+                    if (!is_wp_error($product_id)) {
+
+                        // Set regular price
+                        if ($product_array[4] != "null") {
+                            update_post_meta($product_id, '_regular_price', $product_array[4]);
+                            update_post_meta($product_id, '_price', $product_array[4]); // Set the regular price as the default price
+                        }
+
+                        // Set sale price
+                        if ($product_array[5] != "null") {
+                            update_post_meta($product_id, '_sale_price', $product_array[5]);
+                        }
+
+                        // Set SKU
+                        if ($product_array[7] != "null") {
+                            update_post_meta($product_id, '_sku', $product_array[7]);
+                        }
+
+                        // Set weight, length, width, height
+                        if ($product_array[12] != "null") {
+                            update_post_meta($product_id, '_weight', $product_array[12]);
+                        }
+                        if ($product_array[15] != "null") {
+                            update_post_meta($product_id, '_length', $product_array[15]);
+                        }
+                        if ($product_array[14] != "null") {
+                            update_post_meta($product_id, '_width', $product_array[14]);
+                        }
+                        if ($product_array[13] != "null") {
+                            update_post_meta($product_id, '_height', $product_array[13]);
+                        }
+
+                        // Set product short description
+                        if ($product_array[2] != "null") {
+                            // Update post excerpt (short description)
+                            wp_update_post(array('ID' => $product_id, 'post_excerpt' => $product_array[2] != "null" ? $product_array[2] : ""));
+                        }
+
+                        // Set category
+                        if ($product_array[3] != "null") {
+                            if (str_contains($product_array[3], ">")) {
+                                $categories = explode('>', $product_array[3]); // Assuming categories are separated by >
+                                // Loop through each part and set it as a category
+                                foreach ($categories as $category) {
+                                    wp_set_object_terms($product_id, $category, 'product_cat', true);
+                                }
+                            } else {
+                                wp_set_object_terms($product_id, $product_array[3], 'product_cat');
+                            }
+                        }
+
+                        // Set tags
+                        if ($product_array[8] != "null") { // Assuming tags are in $product_array[8]
+                            $tags = explode(',', $product_array[8]); // Assuming tags are comma-separated
+                            wp_set_object_terms($product_id, $tags, 'product_tag');
+                        }
+
+                        echo '<script>alert("' . $product_array[1] . ' created and published successfully!")</script>';
+                    } else {
+                        echo '<script>alert("' . $product_array[1] . ' Error creating/publishing product: ' . $product_id->get_error_message() . ')</script>';
+                    }
                 }
             }
         }
     }
 }
-
-add_action('admin_init', 'update_missing_products');
+add_action('admin_init', 'add_missing_products');
