@@ -87,6 +87,56 @@ function products_manager_save_settings()
             }
         }
     }
+
+    // Product api separate options in discontinued
+    if (isset($_POST['save_products_manager_discontinued_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-discontinued-panel") {
+        $product_api_discontinued_url_value = "";
+        $product_api_discontinued_code_value = "";
+
+        // Api validation
+        if (isset($_POST['product_api_discontinued_url']) || isset($_POST['product_api_discontinued_code'])) {
+            // Check wether the api coming from url or textarea
+            if ($_POST['product_api_discontinued_url'] != "") {
+                $product_api_discontinued_url_value = filter_var($_POST['product_api_discontinued_url'], FILTER_SANITIZE_URL);
+                $api_content = file_get_contents($product_api_discontinued_url_value);
+            } else {
+                $product_api_discontinued_code_value = $_POST['product_api_discontinued_code'];
+                $api_content = $product_api_discontinued_code_value;
+            }
+
+            // Get the absolute path to the plugin directory
+            $plugin_dir = plugin_dir_path(__FILE__);
+
+            // Specify the local file path within the plugin directory
+            $local_api_path = $plugin_dir . "apis/discontinued-api.csv";
+
+            // Local api file content
+            $local_api_content = file_get_contents($local_api_path);
+
+            if ($api_content !== false) {
+                // Update the content
+                $updated_content = str_replace($local_api_content, $api_content, $api_content);
+
+                // Write the updated content back to the file
+                $result = file_put_contents($local_api_path, $updated_content);
+
+                // Update content from Database if file updated successfully
+                if ($result !== false) {
+                    // Update database value based on the coming content type
+                    if ($_POST['product_api_discontinued_url'] != "") {
+                        update_option('manage_product_api_discontinued_url', $product_api_discontinued_url_value);
+                        update_option('manage_product_api_discontinued_code', "");
+                    } else {
+                        update_option('manage_product_api_discontinued_code', $product_api_discontinued_code_value);
+                        update_option('manage_product_api_discontinued_url', "");
+                    }
+                    echo '<script>alert("API updated successfully!")</script>';
+                } else {
+                    echo '<script>alert("Failed to update the file.")</script>';
+                }
+            }
+        }
+    }
 }
 
 add_action('admin_init', 'products_manager_save_settings');
@@ -157,7 +207,7 @@ function update_discontinued_products()
                         // Update the product stock status to 'outofstock'
                         update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
 
-                        // Optionally, update the product quantity to 0
+                        // Update the product quantity to 0
                         update_post_meta(get_the_ID(), '_stock', 0);
 
                         echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
@@ -187,11 +237,6 @@ function add_missing_products()
             foreach ($missing_products as $product_api_data) {
                 // Split the string into an array using the comma as the delimiter
                 $product_array = explode('::>', $product_api_data);
-
-                // echo "<pre>";
-                // var_dump($product_array);
-                // echo "</pre>";
-                // die;
 
                 // Insert product if title is not empty
                 if ($product_array[1] != "null") {
@@ -240,14 +285,14 @@ function add_missing_products()
                                     // Set the featured image
                                     set_post_thumbnail($product_id, $attachment_id);
                                 } else {
-                                    echo 'Failed to upload image. Error: ' . $upload['error'];
+                                    echo '<div style="float: right;">Failed to upload image for ' . $product_array[1] . '. Error: ' . $upload['error'] . '</div><br>';
                                 }
                             } else {
-                                echo 'Invalid response code: ' . $response_code;
+                                echo '<div style="float: right;">Invalid image response code for ' . $product_array[1] . ': ' . $response_code . '</div><br>';
                             }
                         } else {
                             // Print WP_Error message
-                            echo 'Invalid response. Error: ' . $response->get_error_message();
+                            echo '<div style="float: right;">Invalid image response for ' . $product_array[1] . '. Error: ' . $response->get_error_message() . '</div><br>';
                         }
                     }
 
@@ -318,3 +363,49 @@ function add_missing_products()
     }
 }
 add_action('admin_init', 'add_missing_products');
+
+
+
+/**
+ * Update discontinuted selected products status to draft
+ *
+ * @return void
+ */
+function update_discontinued_separate_products()
+{
+    if (isset($_POST['save_discontinued_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
+
+        $discontinued_products = $_POST['discontinued'];
+
+        // Check the discontinued is empty or not
+        if (!empty($discontinued_products)) {
+            // Loop through the discontinued products to update the titles
+            foreach ($discontinued_products as $product_title) {
+
+                // Query for the product by title
+                $product_query = new WP_Query(array(
+                    'post_type' => 'product',
+                    'posts_per_page' => -1,
+                    'post_status' => 'publish',
+                    'title' => $product_title,
+                ));
+
+                // Check if the product is found
+                if ($product_query->have_posts()) {
+                    while ($product_query->have_posts()) {
+                        $product_query->the_post();
+
+                        // Update the product stock status to 'outofstock'
+                        update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
+
+                        // Optionally, update the product quantity to 0
+                        update_post_meta(get_the_ID(), '_stock', 0);
+
+                        echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
+                    }
+                }
+            }
+        }
+    }
+}
+add_action('admin_init', 'update_discontinued_separate_products');

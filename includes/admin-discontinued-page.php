@@ -15,27 +15,27 @@ function products_manager_discontinued_page()
 ?>
     <div class="wrap">
         <h1>Products Manager By API</h1>
-
+        <h4 style="background: white; padding: 5px 10px; border-radius: 5px; display: inline-flex; gap:10px; align-items-center;"><span>Test Api Url: <span style="user-select: all;"><?= esc_url(plugins_url() . "/products-api-manager/test-apis/test-api.csv") ?></span></span> <a href="<?= esc_url(plugins_url() . "/products-api-manager/test-apis/test-api.csv") ?>" download>Download Test Api</a></h4>
         <form method="post">
             <!-- Product API Url -->
             <div class="input-box">
-                <h3><label for="product_api_url">Product API Url</label></h3>
-                <input type="url" name="product_api_url" id="product_api_url" value="<?= esc_url(get_option('manage_product_api_url')); ?>" />
+                <h3><label for="product_api_discontinued_url">Product API Url</label></h3>
+                <input type="url" name="product_api_discontinued_url" id="product_api_discontinued_url" value="<?= esc_url(get_option('manage_product_api_discontinued_url')); ?>" />
             </div>
             <h4>OR</h4>
             <!-- Product API Code -->
             <div class="input-box">
-                <h3><label for="product_api_code">Paste the CSV Code</label></h3>
-                <textarea name="product_api_code" id="product_api_code" value="<?= get_option('manage_product_api_code'); ?>" cols="30" rows="15"></textarea>
+                <h3><label for="product_api_discontinued_code">Paste the CSV Code</label></h3>
+                <textarea name="product_api_discontinued_code" id="product_api_discontinued_code" value="<?= get_option('manage_product_api_discontinued_code'); ?>" cols="30" rows="15"></textarea>
             </div>
             <br>
             <!-- Save Button -->
-            <input type="submit" onclick="return window.confirm('It may take some time according the size of api, are you sure you want to update?')" name="save_products_manager_theme_options" class="button-primary" value="Update Api" />
+            <input type="submit" onclick="return window.confirm('It may take some time according the size of api, are you sure you want to update?')" name="save_products_manager_discontinued_theme_options" class="button-primary" value="Update Api" />
         </form>
         <br>
 
         <h3 class="nav-tab-wrapper">
-            <a href="#discontinued" class="nav-tab nav-tab-active" data-tab="tab">discontinued</a>
+            <a href="#discontinued" class="nav-tab nav-tab-active" data-tab="tab">Discontinued</a>
         </h3>
 
         <div class="tab-content" id="tab">
@@ -44,10 +44,10 @@ function products_manager_discontinued_page()
                     <label for="discontinued">Discontinued products in our Store:</label>
                 </h4>
                 <div id="discontinued-box">
-                    <select name="discontinued[]" id="discontinued-api" multiple></select>
+                    <select name="discontinued[]" id="discontinued" multiple></select>
                 </div>
                 <br>
-                <button name="save_discontinued_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
+                <button name="save_discontinued_separate_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
             </form>
         </div>
 
@@ -112,7 +112,7 @@ function fecth_api_discontinued_code()
 
     // If file return empty content then override with the texarea content
     if ($api_content == "") {
-        $api_content = get_option('manage_product_api_code');
+        $api_content = get_option('manage_product_api_discontinued_code');
     }
     ?>
         <script>
@@ -159,12 +159,11 @@ function fecth_api_discontinued_code()
                     return result;
                 }
 
-                // Call the function with your CSV data
+                // Api array
                 const api_array = csvToObjectArray(csvData);
-                console.log("Api Array: ", api_array)
 
+                // local products array
                 const products_array = csvToObjectArray(`<?= $csv_data ?>`);
-                console.log("Product Array: ", products_array)
 
                 // Function to find common sub-arrays based on a specific property
                 function common_products(apiArray, productsArray, api_property, product_property) {

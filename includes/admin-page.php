@@ -15,6 +15,7 @@ function products_manager_panel_page()
 ?>
     <div class="wrap">
         <h1>Products Manager By API</h1>
+        <h4 style="background: white; padding: 5px 10px; border-radius: 5px; display: inline-flex; gap:10px; align-items-center;"><span>Test Api Url: <span style="user-select: all;"><?= esc_url(plugins_url() . "/products-api-manager/test-apis/test-api.csv") ?></span></span> <a href="<?= esc_url(plugins_url() . "/products-api-manager/test-apis/test-api.csv") ?>" download>Download Test Api</a></h4>
 
         <form method="post">
             <!-- Product API Url -->
@@ -208,10 +209,8 @@ function fecth_api_manager_code()
 
                 // Call the function with your CSV data
                 const api_array = csvToObjectArray(csvData);
-                console.log("Api Array: ", api_array)
 
                 const products_array = csvToObjectArray(`<?= $csv_data ?>`);
-                console.log("Product Array: ", products_array)
 
                 // Function to find common sub-arrays based on a specific property
                 function common_products(apiArray, productsArray, api_property, product_property) {
@@ -241,7 +240,6 @@ function fecth_api_manager_code()
                 missing_products.forEach(product => {
                     missing.innerHTML += `<option value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product['Product Category'] != "" ? product['Product Category'] : "null"}::>${product.price != "" ? product.price : "null"}::>${product.sale_price != "" ? product.sale_price : "null"}::>${product.Quantity != "" ? product.Quantity : "null"}::>${product.SKU != "" ? product.SKU : "null"}::>${product.size != "" ? product.size : "null"}::>${product.color != "" ? product.color : "null"}::>${product.brand != "" ? product.brand : "null"}::>${product.UPC != "" ? product.UPC : "null"}::>${product.shipping_weight != "" ? product.shipping_weight : "null"}::>${product.shipping_height != "" ? product.shipping_height : "null"}::>${product.shipping_length != "" ? product.shipping_length : "null"}::>${product.shipping_width != "" ? product.shipping_width : "null"}::>${product.image_link != "" ? product.image_link : "null"}">${product.title} -> ${product.price}</option>`;
                 });
-                console.log('Missing Products: ', missing_products);
 
                 // Common Products from APi and Store - Available
                 const available_common_products = common_products(api_array, products_array, 'title', 'title');
