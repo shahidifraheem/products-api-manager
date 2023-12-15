@@ -1,4 +1,8 @@
 <?php
+// Disable direct file access
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
 
 /**
  * Register Products panel page at the administrator level
@@ -239,7 +243,7 @@ function add_missing_products()
                 $product_array = explode('::>', $product_api_data);
 
                 // Insert product if title is not empty
-                if ($product_array[1] != "null") {
+                if ($product_array[1] != "null" && $product_array[1] != "undefined") {
                     $product_data = array(
                         'post_type' => 'product',
                         'post_title' => $product_array[1],
@@ -299,43 +303,43 @@ function add_missing_products()
                     if (!is_wp_error($product_id)) {
 
                         // Set regular price
-                        if ($product_array[4] != "null") {
+                        if ($product_array[4] != "null" && $product_array[4] != "undefined") {
                             update_post_meta($product_id, '_regular_price', $product_array[4]);
                             update_post_meta($product_id, '_price', $product_array[4]); // Set the regular price as the default price
                         }
 
                         // Set sale price
-                        if ($product_array[5] != "null") {
+                        if ($product_array[5] != "null" && $product_array[5] != "undefined") {
                             update_post_meta($product_id, '_sale_price', $product_array[5]);
                         }
 
                         // Set SKU
-                        if ($product_array[7] != "null") {
+                        if ($product_array[7] != "null" && $product_array[7] != "undefined") {
                             update_post_meta($product_id, '_sku', $product_array[7]);
                         }
 
                         // Set weight, length, width, height
-                        if ($product_array[12] != "null") {
+                        if ($product_array[12] != "null" && $product_array[12] != "undefined") {
                             update_post_meta($product_id, '_weight', $product_array[12]);
                         }
-                        if ($product_array[15] != "null") {
+                        if ($product_array[15] != "null" && $product_array[15] != "undefined") {
                             update_post_meta($product_id, '_length', $product_array[15]);
                         }
-                        if ($product_array[14] != "null") {
+                        if ($product_array[14] != "null" && $product_array[14] != "undefined") {
                             update_post_meta($product_id, '_width', $product_array[14]);
                         }
-                        if ($product_array[13] != "null") {
+                        if ($product_array[13] != "null" && $product_array[13] != "undefined") {
                             update_post_meta($product_id, '_height', $product_array[13]);
                         }
 
                         // Set product short description
-                        if ($product_array[2] != "null") {
+                        if ($product_array[2] != "null" && $product_array[2] != "undefined") {
                             // Update post excerpt (short description)
-                            wp_update_post(array('ID' => $product_id, 'post_excerpt' => $product_array[2] != "null" ? $product_array[2] : ""));
+                            wp_update_post(array('ID' => $product_id, 'post_excerpt' => $product_array[2] != "null" && $product_array[2] != "undefined" ? $product_array[2] : ""));
                         }
 
                         // Set category
-                        if ($product_array[3] != "null") {
+                        if ($product_array[3] != "null" && $product_array[3] != "undefined") {
                             if (str_contains($product_array[3], ">")) {
                                 $categories = explode('>', $product_array[3]); // Assuming categories are separated by >
                                 // Loop through each part and set it as a category
@@ -348,7 +352,7 @@ function add_missing_products()
                         }
 
                         // Set tags
-                        if ($product_array[8] != "null") { // Assuming tags are in $product_array[8]
+                        if ($product_array[8] != "null" && $product_array[8] != "undefined") { // Assuming tags are in $product_array[8]
                             $tags = explode(',', $product_array[8]); // Assuming tags are comma-separated
                             wp_set_object_terms($product_id, $tags, 'product_tag');
                         }
