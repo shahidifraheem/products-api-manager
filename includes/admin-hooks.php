@@ -166,8 +166,10 @@ function update_product_prices()
 
                 // Update price if price is valid 
                 if ($current_price != "") {
+                    // Update price type
+                     $current_price_val = floatval($current_price);
                     // Update price by 150-300%
-                    $new_price = $current_price * $price_increase;
+                    $new_price = $current_price_val * $price_increase;
 
                     // Update post price with the new price
                     update_post_meta($available_id, '_price', $new_price);
