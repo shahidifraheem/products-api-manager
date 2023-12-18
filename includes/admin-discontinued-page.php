@@ -47,7 +47,7 @@ function products_manager_discontinued_page()
                     <select name="discontinued[]" id="discontinued" multiple></select>
                 </div>
                 <br>
-                <button name="save_discontinued_separate_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
+                <button name="save_discontinued_separate_theme_options" onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" class="button-primary">Mark as Out of Stock</button>
             </form>
         </div>
 

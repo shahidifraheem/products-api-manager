@@ -87,7 +87,7 @@ function products_manager_panel_page()
                     <select name="discontinued[]" id="discontinued" multiple></select>
                 </div>
                 <br>
-                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will update to draft?')" name="save_discontinued_theme_options" class="button-primary">Also Update Store Products</button>
+                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" name="save_discontinued_theme_options" class="button-primary">Mark as Out of Stock</button>
             </form>
         </div>
 

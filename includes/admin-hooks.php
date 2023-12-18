@@ -168,6 +168,7 @@ function update_product_prices()
                 if ($current_price != "") {
                     // Update price type
                      $current_price_val = floatval($current_price);
+
                     // Update price by 150-300%
                     $new_price = $current_price_val * $price_increase;
 
@@ -379,7 +380,7 @@ add_action('admin_init', 'add_missing_products');
  */
 function update_discontinued_separate_products()
 {
-    if (isset($_POST['save_discontinued_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
+    if (isset($_POST['save_discontinued_separate_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-discontinued-panel") {
 
         $discontinued_products = $_POST['discontinued'];
 
