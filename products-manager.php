@@ -46,18 +46,18 @@ function products_manager_enqueue_styles()
  * Show Alert to install required plugin
  * 
  */
-add_action('admin_notices', 'show_admin_notices');
 function show_admin_notices()
 {
     $plugin_message = "";
     include_once(ABSPATH . 'wp-admin/includes/plugin.php');
-
+    
     // Install and activate WooCommerce
     if (!class_exists('WooCommerce')) {
         $plugin_message = '<div class="notice notice-error is-dismissible">Products Api Manager requires you to install and activate WooCommerce, <a style="display:inline-block;padding:5px; margin: 10px 0;" href="' . esc_url(admin_url('update.php?action=install-plugin&plugin=woocommerce&_wpnonce=' . wp_create_nonce('install-plugin_woocommerce'))) . '">download it from here</a>.</div>';
     }
-
+    
     if ($plugin_message != "") {
         echo $plugin_message;
     }
 }
+add_action('admin_notices', 'show_admin_notices');
