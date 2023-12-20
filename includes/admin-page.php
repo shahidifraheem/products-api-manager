@@ -43,14 +43,14 @@ function products_manager_panel_page()
 
         <div class="tab-content active" id="tab1">
             <form method="post">
-                <h4>
+                <h4 style="margin-bottom: 5px;">
                     <label for="available">Available products in Api and Store:</label>
                 </h4>
                 <div id="available-box">
                     <select name="available[]" id="available" multiple></select>
                 </div>
                 <div id="prices-box">
-                    <h4>
+                    <h4 style="margin-bottom: 5px;">
                         <label for="price-increase">Increase available products price by:</label>
                     </h4>
                     <select name="price-increase" id="price-increase">
@@ -60,6 +60,20 @@ function products_manager_panel_page()
                         <option value="3">300%</option>
                     </select>
                 </div>
+                <div style="display: flex; gap: 20px;">
+                    <div class="input-box">
+                        <h4 style="margin-bottom: 5px;">
+                            <label for="custom-price">Custom Price</label>
+                        </h4>
+                        <input type="text" id="custom-price" name="custom-price" width="100px">
+                    </div>
+                    <div class="input-box">
+                        <h4 style="margin-bottom: 5px;">
+                            <label for="threshold-price">Threshold Price</label>
+                        </h4>
+                        <input type="text" id="threshold-price" name="threshold-price" width="100px">
+                    </div>
+                </div>
                 <br>
                 <button onclick="return window.confirm('Are you sure you want to increase the prices of selected products?')" name="save_price_increase_theme_options" class="button-primary">Update Prices</button>
             </form>
@@ -67,7 +81,7 @@ function products_manager_panel_page()
 
         <div class="tab-content" id="tab2">
             <form method="post">
-                <h4>
+                <h4 style="margin-bottom: 5px;">
                     <label for="missing">Missing products in our Store:</label>
                 </h4>
                 <div id="missing-box">
@@ -80,7 +94,7 @@ function products_manager_panel_page()
 
         <div class="tab-content" id="tab3">
             <form method="post">
-                <h4>
+                <h4 style="margin-bottom: 5px;">
                     <label for="discontinued">Out of Stock Products in Live:</label>
                 </h4>
                 <div id="discontinued-box">
