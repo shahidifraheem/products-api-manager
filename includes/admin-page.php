@@ -60,20 +60,6 @@ function products_manager_panel_page()
                         <option value="3">300%</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 20px;">
-                    <div class="input-box">
-                        <h4 style="margin-bottom: 5px;">
-                            <label for="custom-price">Custom Price</label>
-                        </h4>
-                        <input type="text" id="custom-price" name="custom-price" width="100px">
-                    </div>
-                    <div class="input-box">
-                        <h4 style="margin-bottom: 5px;">
-                            <label for="threshold-price">Threshold Price</label>
-                        </h4>
-                        <input type="text" id="threshold-price" name="threshold-price" width="100px">
-                    </div>
-                </div>
                 <br>
                 <button onclick="return window.confirm('Are you sure you want to increase the prices of selected products?')" name="save_price_increase_theme_options" class="button-primary">Update Prices</button>
             </form>
