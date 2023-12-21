@@ -76,6 +76,7 @@ function products_manager_panel_page()
                 </div>
                 <br>
                 <button onclick="return window.confirm('Are you sure you want to increase the prices of selected products?')" name="save_price_increase_theme_options" class="button-primary">Update Prices</button>
+                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" name="save_out_stock_theme_options" class="button-primary">Mark as Out of Stock</button>
             </form>
         </div>
 

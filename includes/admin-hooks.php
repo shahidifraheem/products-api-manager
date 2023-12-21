@@ -42,6 +42,7 @@ add_action('admin_menu', 'products_manager_panel_menu');
  * 
  * @return void
  */
+
 function products_manager_save_settings()
 {
     if (isset($_POST['save_products_manager_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
@@ -184,6 +185,44 @@ function update_product_prices()
 
                     // Update post price with the new price
                     update_post_meta($available_id, '_price', $new_price);
+                }
+            }
+        }
+
+        /**
+         * Increase prices 
+         */
+        if (isset($_POST['save_out_stock_theme_options'])) {
+
+            $discontinued_products = $_POST['available'];
+
+            // Check the discontinued is empty or not
+            if (!empty($discontinued_products)) {
+                // Loop through the discontinued products to update the titles
+                foreach ($discontinued_products as $product_title) {
+
+                    // Query for the product by title
+                    $product_query = new WP_Query(array(
+                        'post_type' => 'product',
+                        'posts_per_page' => -1,
+                        'post_status' => 'publish',
+                        'title' => $product_title,
+                    ));
+
+                    // Check if the product is found
+                    if ($product_query->have_posts()) {
+                        while ($product_query->have_posts()) {
+                            $product_query->the_post();
+
+                            // Update the product stock status to 'outofstock'
+                            update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
+
+                            // Update the product quantity to 0
+                            update_post_meta(get_the_ID(), '_stock', 0);
+
+                            echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
+                        }
+                    }
                 }
             }
         }
