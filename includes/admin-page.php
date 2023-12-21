@@ -53,7 +53,7 @@ function products_manager_panel_page()
                     <h4 style="margin-bottom: 5px;">
                         <label for="price-increase">Increase available products price by:</label>
                     </h4>
-                    <select name="price-increase" id="price-increase">
+                    <select name="price-increase" id="price-increase" width="100px" disabled>
                         <option value="">Select Price</option>
                         <option value="1.5">150%</option>
                         <option value="2">200%</option>
@@ -65,13 +65,13 @@ function products_manager_panel_page()
                         <h4 style="margin-bottom: 5px;">
                             <label for="custom-price">Custom Price</label>
                         </h4>
-                        <input type="text" id="custom-price" name="custom-price" width="100px">
+                        <input type="text" id="custom-price" name="custom-price" placeholder="Enter custom price" width="100px">
                     </div>
                     <div class="input-box">
                         <h4 style="margin-bottom: 5px;">
                             <label for="threshold-price">Threshold Price</label>
                         </h4>
-                        <input type="text" id="threshold-price" name="threshold-price" width="100px">
+                        <input type="text" id="threshold-price" name="threshold-price" placeholder="Enter max increase price" width="100px" disabled>
                     </div>
                 </div>
                 <br>
@@ -240,7 +240,7 @@ function fecth_api_manager_code()
                 available.innerHTML = "";
                 available_products.forEach(product => {
                     available.innerHTML += `
-                        <option value="${product.ID}">${product.title} -> ${product.price}</option>
+                        <option value="${product.ID}" data-price="${product.price}">${product.title} -> ${product.price}</option>
                 `;
                 });
 
@@ -304,7 +304,57 @@ function fecth_api_manager_code()
                     // Add active class to the clicked tab
                     $(this).addClass('nav-tab-active');
                 });
-            });
+
+                $("#tab1 select, #tab1 input").on("change", function() {
+
+                    console.log("Field Changed..")
+
+                    // Check if #price-increase is selected or blank
+                    let isPriceIncreaseSelected = $("#price-increase").val() === null || $("#price-increase").val() === "";
+                    let availableSelected = $("#available").val() === null || $("#available").val() === "";
+
+                    // Update the #threshold-price element's disabled attribute
+                    $("#threshold-price").prop("disabled", isPriceIncreaseSelected);
+
+                    $("#price-increase").prop("disabled", availableSelected);
+
+                    // Iterate over each selected option inside #available
+                    $("#available option:selected").each(function() {
+                        // Get the value of the data-price attribute
+                        let dataPrice = $(this).data("price");
+                        let priceIncrease = $("#price-increase").val();
+                        let thresholdField = $("#threshold-price");
+                        let thresholdPrice = $("#threshold-price").val();
+
+                        // Check if dataPrice is already a number (integer or float)
+                        if (typeof dataPrice !== 'number') {
+                            // Extract the numeric part from the data-price attribute
+                            let numericPart = parseFloat(dataPrice.replace(/[^\d.]/g, ''));
+
+                            // Convert the numeric part to a floating-point number
+                            let priceValue = parseFloat(numericPart);
+
+                            // Price increase by %
+                            if (priceIncrease != "") {
+                                let increasePrice = priceIncrease * priceValue;
+
+                                if (thresholdPrice != "") {
+                                    if (increasePrice > thresholdPrice) {
+                                        if (!window.confirm($(this).text() + " increased price (" + increasePrice + ") greater than the threshold price (" + thresholdPrice + "), are you still want to continue?")) {
+                                            thresholdField.val("")
+                                        }
+                                    }
+                                }
+
+                                // Output the result for each option
+                                console.log("Option Value: " + $(this).val() + ", Converted Price: " + priceValue + " , Increased Price: " + increasePrice);
+                            }
+                            // Output the result for each option
+                            console.log("Option Value: " + $(this).val() + ", Converted Price: " + priceValue);
+                        }
+                    });
+                });
+            })
         </script>
     <?php }
 add_action('admin_head', 'fecth_api_manager_code'); ?>

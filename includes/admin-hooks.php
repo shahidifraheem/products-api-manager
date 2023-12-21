@@ -1,4 +1,5 @@
 <?php
+
 // Disable direct file access
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -152,9 +153,10 @@ add_action('admin_init', 'products_manager_save_settings');
  */
 function update_product_prices()
 {
-    if (isset($_POST['save_price_increase_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
+    if (isset($_POST['save_price_increase_theme_options']) && isset($_POST["available"]) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
 
         $available_products = $_POST['available'];
+        $custom_price = floatval(sanitize_text_field($_POST['custom-price']));
         $price_increase = floatval(sanitize_text_field($_POST['price-increase']));
 
         // Loop through products
@@ -167,10 +169,18 @@ function update_product_prices()
                 // Update price if price is valid 
                 if ($current_price != "") {
                     // Update price type
-                     $current_price_val = floatval($current_price);
+                    $current_price_val = floatval($current_price);
 
-                    // Update price by 150-300%
-                    $new_price = $current_price_val * $price_increase;
+                    if ($custom_price != 0) {
+                        $new_price = $custom_price;
+                    } else {
+                        // Update price by 150-300%
+                        if ($price_increase != 0) {
+                            $new_price = $current_price_val * $price_increase;
+                        } else {
+                            $new_price = $current_price_val;
+                        }
+                    }
 
                     // Update post price with the new price
                     update_post_meta($available_id, '_price', $new_price);
@@ -370,8 +380,6 @@ function add_missing_products()
     }
 }
 add_action('admin_init', 'add_missing_products');
-
-
 
 /**
  * Update discontinuted selected products status to draft
