@@ -188,44 +188,6 @@ function update_product_prices()
                 }
             }
         }
-
-        /**
-         * Increase prices 
-         */
-        if (isset($_POST['save_out_stock_theme_options'])) {
-
-            $discontinued_products = $_POST['available'];
-
-            // Check the discontinued is empty or not
-            if (!empty($discontinued_products)) {
-                // Loop through the discontinued products to update the titles
-                foreach ($discontinued_products as $product_title) {
-
-                    // Query for the product by title
-                    $product_query = new WP_Query(array(
-                        'post_type' => 'product',
-                        'posts_per_page' => -1,
-                        'post_status' => 'publish',
-                        'title' => $product_title,
-                    ));
-
-                    // Check if the product is found
-                    if ($product_query->have_posts()) {
-                        while ($product_query->have_posts()) {
-                            $product_query->the_post();
-
-                            // Update the product stock status to 'outofstock'
-                            update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
-
-                            // Update the product quantity to 0
-                            update_post_meta(get_the_ID(), '_stock', 0);
-
-                            echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -240,7 +202,12 @@ function update_discontinued_products()
 {
     if (isset($_POST['save_discontinued_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
 
-        $discontinued_products = $_POST['discontinued'];
+        if (isset($_POST['available'])) {
+            $discontinued_products = $_POST['available'];
+        } else {
+            $discontinued_products = $_POST['discontinued'];
+        }
+
 
         // Check the discontinued is empty or not
         if (!empty($discontinued_products)) {

@@ -65,7 +65,7 @@ function products_manager_panel_page()
                         <h4 style="margin-bottom: 5px;">
                             <label for="custom-price">Custom Price</label>
                         </h4>
-                        <input type="text" id="custom-price" name="custom-price" placeholder="Enter custom price" width="100px">
+                        <input type="text" id="custom-price" name="custom-price" placeholder="Enter custom price" width="100px" disabled>
                     </div>
                     <div class="input-box">
                         <h4 style="margin-bottom: 5px;">
@@ -76,7 +76,7 @@ function products_manager_panel_page()
                 </div>
                 <br>
                 <button onclick="return window.confirm('Are you sure you want to increase the prices of selected products?')" name="save_price_increase_theme_options" class="button-primary">Update Prices</button>
-                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" name="save_out_stock_theme_options" class="button-primary">Mark as Out of Stock</button>
+                <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" name="save_discontinued_theme_options" id="mark_out_of_stock" class="button-primary">Mark as Out of Stock</button>
             </form>
         </div>
 
@@ -241,7 +241,7 @@ function fecth_api_manager_code()
                 available.innerHTML = "";
                 available_products.forEach(product => {
                     available.innerHTML += `
-                        <option value="${product.ID}" data-price="${product.price}">${product.title} -> ${product.price}</option>
+                        <option value="${product.ID}" data-price="${product.price}" data-title="${product.title}">${product.title} -> ${product.price}</option>
                 `;
                 });
 
@@ -306,6 +306,12 @@ function fecth_api_manager_code()
                     $(this).addClass('nav-tab-active');
                 });
 
+                $("#mark_out_of_stock").click(function() {
+                    $("#available option:selected").each(function() {
+                        $(this).val($(this).data("title"))
+                    })
+                })
+
                 $("#tab1 select, #tab1 input").on("change", function() {
 
                     console.log("Field Changed..")
@@ -318,6 +324,7 @@ function fecth_api_manager_code()
                     $("#threshold-price").prop("disabled", isPriceIncreaseSelected);
 
                     $("#price-increase").prop("disabled", availableSelected);
+                    $("#custom-price").prop("disabled", availableSelected);
 
                     // Iterate over each selected option inside #available
                     $("#available option:selected").each(function() {

@@ -43,7 +43,7 @@ function products_manager_enqueue_styles()
 }
 
 /**
- * Show Alert to install required plugin
+ * Show alert to install required plugin
  * 
  */
 function show_admin_notices()
