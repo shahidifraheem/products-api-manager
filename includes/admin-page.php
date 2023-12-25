@@ -44,10 +44,15 @@ function products_manager_panel_page()
         <div class="tab-content active" id="tab1">
             <form method="post">
                 <h4 style="margin-bottom: 5px;">
-                    <label for="available">Available products in Api and Store:</label>
+                    Available products in Api and Store:
                 </h4>
-                <div id="available-box">
-                    <select name="available[]" id="available" multiple></select>
+                <div class="check-all">
+                    <input type="checkbox" id="available-select-all" class="select-all">
+                    <label for="available-select-all">Select All</label>
+                </div>
+                <hr>
+                <div id="available-checkboxes" class="checkbox-container">
+                    <!-- Checkboxes rendering from jQuery -->
                 </div>
                 <div id="prices-box">
                     <h4 style="margin-bottom: 5px;">
@@ -85,8 +90,13 @@ function products_manager_panel_page()
                 <h4 style="margin-bottom: 5px;">
                     <label for="missing">Missing products in our Store:</label>
                 </h4>
-                <div id="missing-box">
-                    <select name="missing[]" id="missing" multiple></select>
+                <div class="check-all">
+                    <input type="checkbox" id="missing-select-all" class="select-all">
+                    <label for="missing-select-all">Select All</label>
+                </div>
+                <hr>
+                <div id="missing-checkboxes" class="checkbox-container">
+                    <!-- Checkboxes rendering from jQuery -->
                 </div>
                 <br>
                 <button name="save_missing_theme_options" onclick="return window.confirm('Are you sure you want to publish the selected products?')" class="button-primary">Add Missing Products</button>
@@ -98,8 +108,13 @@ function products_manager_panel_page()
                 <h4 style="margin-bottom: 5px;">
                     <label for="discontinued">Out of Stock Products in Live:</label>
                 </h4>
-                <div id="discontinued-box">
-                    <select name="discontinued[]" id="discontinued" multiple></select>
+                <div class="check-all">
+                    <input type="checkbox" id="discontinued-select-all" class="select-all">
+                    <label for="discontinued-select-all">Select All</label>
+                </div>
+                <hr>
+                <div id="discontinued-checkboxes" class="checkbox-container">
+                    <!-- Checkboxes rendering from jQuery -->
                 </div>
                 <br>
                 <button onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" name="save_discontinued_theme_options" class="button-primary">Mark as Out of Stock</button>
@@ -236,12 +251,37 @@ function fecth_api_manager_code()
 
                 // Common Products from APi and Store - Available
                 const available_products = common_products(products_array, api_array, 'title', 'title');
+                console.log("Available Products: ", available_products)
 
-                const available = document.querySelector("#available");
+                // Function to add 'brand' property from api_array to available_products
+                function mergeBrandProperty(availableProducts, apiArray) {
+                    return availableProducts.map(product => {
+                        const correspondingApiProduct = apiArray.find(apiProduct => apiProduct.title === product.title);
+
+                        // If a corresponding product is found, add the 'brand' property
+                        if (correspondingApiProduct) {
+                            return {
+                                ...product,
+                                brand: correspondingApiProduct.brand
+                            };
+                        }
+
+                        // If no corresponding product is found, return the original product
+                        return product;
+                    });
+                }
+
+                // Merge the 'brand' property
+                const mergedProducts = mergeBrandProperty(available_products, api_array);
+
+                const available = document.querySelector("#available-checkboxes");
                 available.innerHTML = "";
-                available_products.forEach(product => {
+                mergedProducts.forEach(product => {
                     available.innerHTML += `
-                        <option value="${product.ID}" data-price="${product.price}" data-title="${product.title}">${product.title} -> ${product.price}</option>
+                    <div class="input-box">
+                        <input type="checkbox" name="available[]" id="available-${product.ID}" value="${product.ID}" data-price="${product.price}" data-title="${product.title}">
+                        <label for="available-${product.ID}">${product.title} -&gt; ${product.price}  -&gt; ${product.brand}</label>
+                    </div>
                 `;
                 });
 
@@ -250,10 +290,14 @@ function fecth_api_manager_code()
                     !products_array.some(productItem => productItem.title === apiItem.title)
                 );
 
-                const missing = document.querySelector("#missing");
+                const missing = document.querySelector("#missing-checkboxes");
                 missing.innerHTML = "";
                 missing_products.forEach(product => {
-                    missing.innerHTML += `<option value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product['Product Category'] != "" ? product['Product Category'] : "null"}::>${product.price != "" ? product.price : "null"}::>${product.sale_price != "" ? product.sale_price : "null"}::>${product.Quantity != "" ? product.Quantity : "null"}::>${product.SKU != "" ? product.SKU : "null"}::>${product.size != "" ? product.size : "null"}::>${product.color != "" ? product.color : "null"}::>${product.brand != "" ? product.brand : "null"}::>${product.UPC != "" ? product.UPC : "null"}::>${product.shipping_weight != "" ? product.shipping_weight : "null"}::>${product.shipping_height != "" ? product.shipping_height : "null"}::>${product.shipping_length != "" ? product.shipping_length : "null"}::>${product.shipping_width != "" ? product.shipping_width : "null"}::>${product.image_link != "" ? product.image_link : "null"}">${product.title} -> ${product.price}</option>`;
+                    missing.innerHTML += `
+                    <div class="input-box">
+                        <input type="checkbox" name="missing[]" id="missing-${product.brand}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product['Product Category'] != "" ? product['Product Category'] : "null"}::>${product.price != "" ? product.price : "null"}::>${product.sale_price != "" ? product.sale_price : "null"}::>${product.Quantity != "" ? product.Quantity : "null"}::>${product.SKU != "" ? product.SKU : "null"}::>${product.size != "" ? product.size : "null"}::>${product.color != "" ? product.color : "null"}::>${product.brand != "" ? product.brand : "null"}::>${product.UPC != "" ? product.UPC : "null"}::>${product.shipping_weight != "" ? product.shipping_weight : "null"}::>${product.shipping_height != "" ? product.shipping_height : "null"}::>${product.shipping_length != "" ? product.shipping_length : "null"}::>${product.shipping_width != "" ? product.shipping_width : "null"}::>${product.image_link != "" ? product.image_link : "null"}" data-price="${product.price}" data-title="${product.title}">
+                        <label for="missing-${product.brand}">${product.title} -&gt; ${product.price} -&gt;  ${product.brand}</label>
+                    </div>`;
                 });
 
                 // Common Products from APi and Store - Available
@@ -261,7 +305,7 @@ function fecth_api_manager_code()
                 const products_stock_out = available_common_products.filter(product => product['Quantity'] < 1);
 
                 // Products out of stock in Live Api - Discontinued
-                const discontinued = document.querySelector("#discontinued");
+                const discontinued = document.querySelector("#discontinued-checkboxes");
                 discontinued.innerHTML = "";
 
                 // Use a Set to store unique product titles
@@ -275,9 +319,11 @@ function fecth_api_manager_code()
                         uniqueTitles.add(product.title);
 
                         // Render the option
-                        discontinued.innerHTML += `
-                            <option value="${product.title}">${product.title}</option>
-                        `;
+                        discontinued.innerHTML += ` 
+                        <div class="input-box">
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="${product.title}">
+                            <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
+                        </div>`;
                     }
                 });
             });
@@ -305,6 +351,23 @@ function fecth_api_manager_code()
                     // Add active class to the clicked tab
                     $(this).addClass('nav-tab-active');
                 });
+
+                // When "Select All" checkbox is changed
+                $(".select-all").change(function() {
+                    // Check or uncheck all checkboxes based on the state of "Select All" checkbox
+                    $(this).parents("form").find(".checkbox-container input[type='checkbox']").prop('checked', $(this).prop('checked'));
+                });
+
+                // When any checkbox inside the container is changed
+                $(".checkbox-container").on('change', 'input[type="checkbox"]', function() {
+                    // If all checkboxes are checked, check the "Select All" checkbox; otherwise, uncheck it
+                    if ($(".checkbox-container input[type='checkbox']:checked").length === $(".checkbox-container input[type='checkbox']").length) {
+                        $(this).parents("form").find(".select-all").prop('checked', true);
+                    } else {
+                        $(this).parents("form").find(".select-all").prop('checked', false);
+                    }
+                });
+
 
                 $("#mark_out_of_stock").click(function() {
                     $("#available option:selected").each(function() {

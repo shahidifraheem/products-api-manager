@@ -43,8 +43,13 @@ function products_manager_discontinued_page()
                 <h4>
                     <label for="discontinued">Discontinued products in our Store:</label>
                 </h4>
-                <div id="discontinued-box">
-                    <select name="discontinued[]" id="discontinued" multiple></select>
+                <div class="check-all">
+                    <input type="checkbox" id="discontinued-select-all" class="select-all">
+                    <label for="discontinued-select-all">Select All</label>
+                </div>
+                <hr>
+                <div id="discontinued-checkboxes" class="checkbox-container">
+                    <!-- Checkboxes rendering from jQuery -->
                 </div>
                 <br>
                 <button name="save_discontinued_separate_theme_options" onclick="return window.confirm('Are you sure you want to continue as all products with same titles will be marked as out of stock?')" class="button-primary">Mark as Out of Stock</button>
@@ -177,7 +182,7 @@ function fecth_api_discontinued_code()
                 const products_stock_out = available_common_products.filter(product => product['Quantity'] < 1);
 
                 // Products out of stock in Live Api - Discontinued
-                const discontinued = document.querySelector("#discontinued");
+                const discontinued = document.querySelector("#discontinued-checkboxes");
                 discontinued.innerHTML = "";
 
                 // Use a Set to store unique product titles
@@ -191,11 +196,32 @@ function fecth_api_discontinued_code()
 
                         // Render the option
                         discontinued.innerHTML += `
-                            <option value="${product.title}">${product.title}</option>
+                        <div class="input-box">
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="${product.title}">
+                            <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
+                        </div>
                         `;
                     }
                 });
             });
+
+            jQuery(function($) {
+                // When "Select All" checkbox is changed
+                $(".select-all").change(function() {
+                    // Check or uncheck all checkboxes based on the state of "Select All" checkbox
+                    $(this).parents("form").find(".checkbox-container input[type='checkbox']").prop('checked', $(this).prop('checked'));
+                });
+
+                // When any checkbox inside the container is changed
+                $(".checkbox-container").on('change', 'input[type="checkbox"]', function() {
+                    // If all checkboxes are checked, check the "Select All" checkbox; otherwise, uncheck it
+                    if ($(".checkbox-container input[type='checkbox']:checked").length === $(".checkbox-container input[type='checkbox']").length) {
+                        $(this).parents("form").find(".select-all").prop('checked', true);
+                    } else {
+                        $(this).parents("form").find(".select-all").prop('checked', false);
+                    }
+                });
+            })
         </script>
     <?php }
 add_action('admin_head', 'fecth_api_discontinued_code'); ?>
