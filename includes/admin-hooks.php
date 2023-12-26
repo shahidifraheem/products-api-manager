@@ -69,7 +69,7 @@ function products_manager_save_settings()
             // Local api file content
             $local_api_content = file_get_contents($local_api_path);
 
-            if ($api_content !== false) {
+            if ($api_content !== "") {
                 // Update the content
                 $updated_content = str_replace($local_api_content, $api_content, $api_content);
 
