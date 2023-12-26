@@ -46,6 +46,7 @@ add_action('admin_menu', 'products_manager_panel_menu');
 function products_manager_save_settings()
 {
     if (isset($_POST['save_products_manager_theme_options']) && isset($_GET["page"]) && $_GET["page"] == "products-manager-panel") {
+        $api_content = "";
         $product_api_url_value = "";
         $product_api_code_value = "";
 
