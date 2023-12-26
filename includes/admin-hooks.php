@@ -91,6 +91,8 @@ function products_manager_save_settings()
                     echo '<script>alert("Failed to update the file.")</script>';
                 }
             }
+        } else {
+            echo 'Invalid Request';
         }
     }
 
