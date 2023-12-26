@@ -90,6 +90,8 @@ function products_manager_save_settings()
                 } else {
                     echo '<script>alert("Failed to update the file.")</script>';
                 }
+            } else {
+                echo 'Api Failure';
             }
         } else {
             echo 'Invalid Request';
