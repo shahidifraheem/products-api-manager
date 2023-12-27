@@ -35,6 +35,17 @@ function products_manager_panel_menu()
 // Hook to add the admin page and submenu
 add_action('admin_menu', 'products_manager_panel_menu');
 
+// Register UPC as a custom field for WooCommerce product
+function register_upc_as_custom_field()
+{
+    register_post_meta('product', '_upc', array(
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'string',
+    ));
+}
+add_action('init', 'register_upc_as_custom_field');
+
 /**
  * Manage the products theme panel page data from the admin panel
  * 
@@ -374,17 +385,6 @@ function add_missing_products()
                         if ($product_array[7] != "null" && $product_array[7] != "undefined") {
                             update_post_meta($product_id, '_sku', $product_array[7]);
                         }
-
-                        // Register UPC as a custom field for WooCommerce product
-                        function register_upc_as_custom_field()
-                        {
-                            register_post_meta('product', '_upc', array(
-                                'show_in_rest' => true,
-                                'single' => true,
-                                'type' => 'string',
-                            ));
-                        }
-                        add_action('init', 'register_upc_as_custom_field');
 
                         // Set UPC
                         if ($product_array[11] != "null" && $product_array[11] != "undefined") {
