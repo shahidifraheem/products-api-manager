@@ -83,19 +83,20 @@ function products_manager_save_settings()
                     if ($_POST['product_api_url'] != "") {
                         update_option('manage_product_api_url', $product_api_url_value);
                         update_option('manage_product_api_code', "");
+                        echo '<script>alert("API url updated successfully!")</script>';
                     } else {
                         update_option('manage_product_api_code', $product_api_code_value);
                         update_option('manage_product_api_url', "");
+                        echo '<script>alert("API code updated successfully!")</script>';
                     }
-                    echo '<script>alert("API updated successfully!")</script>';
                 } else {
                     echo '<script>alert("Failed to update the file.")</script>';
                 }
             } else {
-                echo 'Api Failure';
+                echo '<script>alert("Api Failure.")</script>';
             }
         } else {
-            echo 'Invalid Request';
+            echo '<script>alert("Invalid Request.")</script>';
         }
     }
 
@@ -340,6 +341,22 @@ function add_missing_products()
                         // Set SKU
                         if ($product_array[7] != "null" && $product_array[7] != "undefined") {
                             update_post_meta($product_id, '_sku', $product_array[7]);
+                        }
+
+                        // Register UPC as a custom field for WooCommerce product
+                        function register_upc_as_custom_field()
+                        {
+                            register_post_meta('product', '_upc', array(
+                                'show_in_rest' => true,
+                                'single' => true,
+                                'type' => 'string',
+                            ));
+                        }
+                        add_action('init', 'register_upc_as_custom_field');
+
+                        // Set UPC
+                        if ($product_array[11] != "null" && $product_array[11] != "undefined") {
+                            update_post_meta($product_id, '_upc', $product_array[11]);
                         }
 
                         // Set weight, length, width, height
