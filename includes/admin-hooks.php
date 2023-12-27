@@ -126,7 +126,23 @@ function products_manager_save_settings()
             // Check wether the api coming from url or textarea
             if ($_POST['product_api_discontinued_url'] != "") {
                 $product_api_discontinued_url_value = filter_var($_POST['product_api_discontinued_url'], FILTER_SANITIZE_URL);
-                $api_content = file_get_contents($product_api_discontinued_url_value);
+
+                // Initialize cURL session
+                $ch = curl_init($product_api_discontinued_url_value);
+
+                // Set cURL options
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                // Execute cURL session and get the API content
+                $api_content = curl_exec($ch);
+
+                // Check for cURL errors
+                if (curl_errno($ch)) {
+                    echo '<script>alert("' . curl_error($ch) . 'Error fetching content from the API.")</script>';
+                }
+
+                // Close cURL session
+                curl_close($ch);
             } else {
                 $product_api_discontinued_code_value = $_POST['product_api_discontinued_code'];
                 $api_content = $product_api_discontinued_code_value;
