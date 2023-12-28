@@ -454,7 +454,7 @@ function update_discontinued_separate_products()
 
         // Check the discontinued is empty or not
         if (!empty($discontinued_products)) {
-            // Loop through the discontinued products to update the titles
+            /* // Loop through the discontinued products to update the titles
             foreach ($discontinued_products as $product_title) {
 
                 // Query for the product by title
@@ -475,8 +475,82 @@ function update_discontinued_separate_products()
 
                         // Optionally, update the product quantity to 0
                         update_post_meta(get_the_ID(), '_stock', 0);
-
+                        
                         echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
+                    }
+                }
+            } */
+
+            // Loop through the discontinued products to update the stock
+            foreach ($discontinued_products as $product_data) {
+                $product = explode('::>', $product_data);
+
+                $product_query = new WP_Query(array(
+                    'post_type'      => 'product',
+                    'posts_per_page' => -1,
+                    'post_status'    => 'publish',
+                    'meta_query'     => array(
+                        'relation' => 'OR',
+                        array(
+                            'key'     => '_product_description',
+                            'value'   => sanitize_text_field($product[2]),
+                            'compare' => '=',
+                        ),
+                        array(
+                            'key'     => '_sku',
+                            'value'   => $product[3],
+                            'compare' => '=',
+                        ),
+                    ),
+                    'title' => $product[1], // Add a title filter
+                ));
+
+                // Check if the product is found
+                if ($product_query->have_posts()) {
+                    while ($product_query->have_posts()) {
+                        $product_query->the_post();
+
+                        // Update the product stock status to 'outofstock'
+                        update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
+
+                        // Update the product quantity to 0
+                        update_post_meta(get_the_ID(), '_stock', 0);
+
+                        echo '<script>alert("' . $product[1] . ' marked as out of stock!")</script>';
+                    }
+                } else {
+                    // If the product is not found by title, perform a separate query by description or SKU
+                    $product_query_alt = new WP_Query(array(
+                        'post_type'      => 'product',
+                        'posts_per_page' => -1,
+                        'post_status'    => 'publish',
+                        'meta_query'     => array(
+                            'relation' => 'OR',
+                            array(
+                                'key'     => '_product_description',
+                                'value'   => sanitize_text_field($product[2]),
+                                'compare' => '=',
+                            ),
+                            array(
+                                'key'     => '_sku',
+                                'value'   => $product[3],
+                                'compare' => '=',
+                            ),
+                        ),
+                    ));
+
+                    if ($product_query_alt->have_posts()) {
+                        while ($product_query_alt->have_posts()) {
+                            $product_query_alt->the_post();
+
+                            // Update the product stock status to 'outofstock'
+                            update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
+
+                            // Update the product quantity to 0
+                            update_post_meta(get_the_ID(), '_stock', 0);
+
+                            echo '<script>alert("Product marked as out of stock!")</script>';
+                        }
                     }
                 }
             }

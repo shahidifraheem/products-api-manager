@@ -188,6 +188,7 @@ function fecth_api_discontinued_code()
                 // Use a Set to store unique product titles
                 const uniqueTitles = new Set();
 
+                console.log(products_stock_out)
                 products_stock_out.forEach(product => {
                     // Check if the product title is not already in the set
                     if (!uniqueTitles.has(product.title)) {
@@ -197,7 +198,7 @@ function fecth_api_discontinued_code()
                         // Render the option
                         discontinued.innerHTML += `
                         <div class="input-box">
-                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="${product.title}">
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
                             <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
                         </div>
                         `;
