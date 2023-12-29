@@ -93,21 +93,28 @@ function fecth_api_discontinued_code()
 
         $products = get_posts($args);
 
-        $csv_data = "ID,title,price\n";
+        $csv_data = "ID,title,SKU,description,price\n";
 
         foreach ($products as $product) {
             $product_id = $product->ID;
             $product_title = $product->post_title;
 
-            // Get product price (assuming it's stored as post meta with key 'price')
+            // Get product SKU (assuming it's stored as post meta with key '_sku')
+            $product_sku = get_post_meta($product_id, '_sku', true);
+
+            // Get product description (assuming it's stored as post meta with key '_product_description')
+            $product_description = get_post_meta($product_id, '_product_description', true);
+
+            // Get product price (assuming it's stored as post meta with key '_price')
             $product_price = get_post_meta($product_id, '_price', true);
 
-            // Add product ID, title, and price to CSV string
-            $csv_data .= "$product_id,\"$product_title\",$product_price\n";
+            // Add product ID, title, SKU, description, and price to CSV string
+            $csv_data .= "$product_id,\"$product_title\",\"$product_sku\",\"$product_description\",$product_price\n";
         }
 
         return $csv_data;
     }
+
 
     // Get products data as CSV format
     $csv_data = get_discontinued_product_data_as_csv();
@@ -133,6 +140,19 @@ function fecth_api_discontinued_code()
                         .toLowerCase();
 
                     return slug;
+                }
+
+                /**
+                 * Double Quotes remover
+                 * 
+                 */
+                function removeDoubleQuotes(input) {
+                    if (input === undefined || input === null) {
+                        return input;
+                    } else {
+                        // Use a regular expression to remove double quotes
+                        return input.replace(/"/g, '');
+                    }
                 }
 
                 // Store csv data from php variable to js variable
@@ -166,10 +186,12 @@ function fecth_api_discontinued_code()
 
                 // Api array
                 const api_array = csvToObjectArray(csvData);
+                console.log(api_array);
 
                 // local products array
                 const products_array = csvToObjectArray(`<?= $csv_data ?>`);
 
+                console.log(products_array);
                 // Function to find common sub-arrays based on a specific property
                 function common_products(apiArray, productsArray, api_property, product_property) {
                     return apiArray.filter(apiObj =>
@@ -178,8 +200,24 @@ function fecth_api_discontinued_code()
                 }
 
                 // Common Products from APi and Store - Available
-                const available_common_products = common_products(api_array, products_array, 'title', 'title');
-                const products_stock_out = available_common_products.filter(product => product['Quantity'] < 1);
+                let available_common_products_title = common_products(api_array, products_array, 'title', 'title');
+                console.log("available_common_products_title: ", available_common_products_title)
+
+                let available_common_products_sku = common_products(api_array, products_array, 'SKU', 'SKU');
+                console.log("available_common_products_sku: ", available_common_products_sku)
+
+                let available_common_products_desc = common_products(api_array, products_array, 'description', 'description');
+                console.log("available_common_products_desc: ", available_common_products_desc)
+
+                let products_stock_out = available_common_products_title.filter(product => product['Quantity'] < 1);
+
+                if (available_common_products_title && available_common_products_title.length > 0) {
+                    console.log("Title")
+                } else if (available_common_products_sku && available_common_products_sku.length > 0) {
+                    console.log("SKU")
+                } else {
+                    console.log("Description")
+                }
 
                 // Products out of stock in Live Api - Discontinued
                 const discontinued = document.querySelector("#discontinued-checkboxes");
@@ -189,18 +227,49 @@ function fecth_api_discontinued_code()
                 const uniqueTitles = new Set();
 
                 products_stock_out.forEach(product => {
-                    // Check if the product title is not already in the set
-                    if (!uniqueTitles.has(product.title)) {
-                        // Add the product title to the set
-                        uniqueTitles.add(product.title);
 
-                        // Render the option
-                        discontinued.innerHTML += `
-                        <div class="input-box">
+                    if (product.title) {
+                        // Check if the product title is not already in the set
+                        if (!uniqueTitles.has(product.title)) {
+                            // Add the product title to the set
+                            uniqueTitles.add(product.title);
+
+                            // Render the option
+                            discontinued.innerHTML += `
+                            <div class="input-box">
                             <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
                             <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
-                        </div>
-                        `;
+                            </div>
+                            `;
+                        }
+                    } else if (product.description) {
+                        // Check if the product description is not already in the set
+                        if (!uniqueTitles.has(product.description)) {
+                            // Add the product description to the set
+                            uniqueTitles.add(product.description);
+
+                            // Render the option
+                            discontinued.innerHTML += `
+                            <div class="input-box">
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
+                            <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
+                            </div>
+                            `;
+                        }
+                    } else {
+                        // Check if the product SKU is not already in the set
+                        if (!uniqueTitles.has(product.SKU)) {
+                            // Add the product SKU to the set
+                            uniqueTitles.add(product.SKU);
+
+                            // Render the option
+                            discontinued.innerHTML += `
+                            <div class="input-box">
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
+                            <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
+                            </div>
+                            `;
+                        }
                     }
                 });
             });

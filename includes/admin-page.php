@@ -225,6 +225,19 @@ function fecth_api_manager_code()
                     return slug;
                 }
 
+                /**
+                 * Double Quotes remover
+                 * 
+                 */
+                function removeDoubleQuotes(input) {
+                    if (input === undefined || input === null) {
+                        return input;
+                    } else {
+                        // Use a regular expression to remove double quotes
+                        return input.replace(/"/g, '');
+                    }
+                }
+
                 // Store csv data from php variable to js variable
                 const csvData = `<?= $api_content ?>`;
 
@@ -311,7 +324,7 @@ function fecth_api_manager_code()
                 missing_products.forEach(product => {
                     missing.innerHTML += `
                     <div class="input-box">
-                        <input type="checkbox" name="missing[]" id="missing-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product['Product Category'] != "" ? product['Product Category'] : "null"}::>${product.price != "" ? product.price : "null"}::>${product.sale_price != "" ? product.sale_price : "null"}::>${product.Quantity != "" ? product.Quantity : "null"}::>${product.SKU != "" ? product.SKU : "null"}::>${product.size != "" ? product.size : "null"}::>${product.color != "" ? product.color : "null"}::>${product.brand != "" ? product.brand : "null"}::>${product.UPC != "" ? product.UPC : "null"}::>${product.shipping_weight != "" ? product.shipping_weight : "null"}::>${product.shipping_height != "" ? product.shipping_height : "null"}::>${product.shipping_length != "" ? product.shipping_length : "null"}::>${product.shipping_width != "" ? product.shipping_width : "null"}::>${product.image_link != "" ? product.image_link : "null"}" data-price="${product.price}" data-title="${product.title}">
+                        <input type="checkbox" name="missing[]" id="missing-${generate_slug(product.title)}" value="::>${product.title != "" ? removeDoubleQuotes(product.title) : "null"}::>${product.description != "" ? removeDoubleQuotes(product.description) : "null"}::>${product['Product Category'] != "" ? removeDoubleQuotes(product['Product Category']) : "null"}::>${product.price != "" ? product.price : "null"}::>${product.sale_price != "" ? product.sale_price : "null"}::>${product.Quantity != "" ? product.Quantity : "null"}::>${product.SKU != "" ? product.SKU : "null"}::>${product.size != "" ? product.size : "null"}::>${product.color != "" ? product.color : "null"}::>${product.brand != "" ? product.brand : "null"}::>${product.UPC != "" ? product.UPC : "null"}::>${product.shipping_weight != "" ? product.shipping_weight : "null"}::>${product.shipping_height != "" ? product.shipping_height : "null"}::>${product.shipping_length != "" ? product.shipping_length : "null"}::>${product.shipping_width != "" ? product.shipping_width : "null"}::>${product.image_link != "" ? product.image_link : "null"}" data-price="${product.price}" data-title="${product.title}">
                         <label for="missing-${generate_slug(product.title)}">${product.title} -&gt; ${product.price} -&gt;  ${product.brand}</label>
                     </div>`;
                 });
@@ -337,7 +350,7 @@ function fecth_api_manager_code()
                         // Render the option
                         discontinued.innerHTML += ` 
                         <div class="input-box">
-                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="${product.title}">
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="${removeDoubleQuotes(product.title)}">
                             <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
                         </div>`;
                     }
