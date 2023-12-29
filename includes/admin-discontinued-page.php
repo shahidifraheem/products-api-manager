@@ -188,7 +188,6 @@ function fecth_api_discontinued_code()
                 // Use a Set to store unique product titles
                 const uniqueTitles = new Set();
 
-                console.log(products_stock_out)
                 products_stock_out.forEach(product => {
                     // Check if the product title is not already in the set
                     if (!uniqueTitles.has(product.title)) {

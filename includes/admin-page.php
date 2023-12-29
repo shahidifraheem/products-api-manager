@@ -268,7 +268,6 @@ function fecth_api_manager_code()
 
                 // Common Products from APi and Store - Available
                 const available_products = common_products(products_array, api_array, 'title', 'title');
-                console.log("Available Products: ", available_products)
 
                 // Function to add 'brand' property from api_array to available_products
                 function mergeBrandProperty(availableProducts, apiArray) {
@@ -387,14 +386,13 @@ function fecth_api_manager_code()
 
 
                 $("#mark_out_of_stock").click(function() {
-                    $("#available option:selected").each(function() {
+                    $("#available-checkboxes input:checked").each(function() {
                         $(this).val($(this).data("title"))
                     })
                 })
 
                 $("#tab1 select, #tab1 input").on("change", function() {
 
-                    console.log("Field Changed..")
 
                     // Check if #price-increase is selected or blank
                     let isPriceIncreaseSelected = $("#price-increase").val() === null || $("#price-increase").val() === "";
@@ -406,8 +404,8 @@ function fecth_api_manager_code()
                     $("#price-increase").prop("disabled", availableSelected);
                     $("#custom-price").prop("disabled", availableSelected);
 
-                    // Iterate over each selected option inside #available
-                    $("#available option:selected").each(function() {
+                    // Iterate over each checked option inside #available
+                    $("#available-checkboxes input:checked").each(function() {
                         // Get the value of the data-price attribute
                         let dataPrice = $(this).data("price");
                         let priceIncrease = $("#price-increase").val();
