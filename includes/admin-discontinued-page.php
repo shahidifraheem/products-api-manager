@@ -120,7 +120,23 @@ function fecth_api_discontinued_code()
     $csv_data = get_discontinued_product_data_as_csv();
 
     $api_url = esc_url(plugins_url() . "/products-api-manager/includes/apis/discontinued-api.csv");
-    $api_content = file_get_contents($api_url);
+
+    // Initialize cURL session
+    $ch = curl_init($api_url);
+
+    // Set cURL options
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    // Execute cURL session and get the API content
+    $api_content = curl_exec($ch);
+
+    // Check for cURL errors
+    if (curl_errno($ch)) {
+        echo '<script>alert("' . curl_error($ch) . 'Error fetching content from the API.")</script>';
+    }
+
+    // Close cURL session
+    curl_close($ch);
 
     // If file return empty content then override with the texarea content
     if ($api_content == "") {
