@@ -186,11 +186,9 @@ function fecth_api_discontinued_code()
 
                 // Api array
                 const api_array = csvToObjectArray(csvData);
-                console.log(api_array);
 
                 // local products array
                 const products_array = csvToObjectArray(`<?= $csv_data ?>`);
-                console.log(products_array);
 
                 // Function to find common sub-arrays based on a specific property
                 function common_products(apiArray, productsArray, api_property, product_property) {
@@ -202,30 +200,31 @@ function fecth_api_discontinued_code()
                 // Common Products from APi and Store - Available
                 // Title based products
                 let available_common_products_title = common_products(api_array, products_array, 'title', 'title');
-                
+
                 // SKU based products
                 let available_common_products_sku = common_products(api_array, products_array, 'SKU', 'SKU');
-                
+
                 // Description based products
                 let available_common_products_desc = common_products(api_array, products_array, 'description', 'description');
 
                 let products_stock_out = [];
 
                 if (available_common_products_title && available_common_products_title.length > 0) {
-                    products_stock_out = available_common_products_title.filter(product => product['Quantity'] < 1);
+                    // products_stock_out = available_common_products_title.filter(product => product['Quantity'] < 1);
+                    products_stock_out = available_common_products_title;
                 } else if (available_common_products_sku && available_common_products_sku.length > 0) {
                     products_stock_out = available_common_products_sku;
                 } else {
-                    products_stock_out = available_common_products_desc.filter(product => product['Quantity'] < 1);
+                    products_stock_out = available_common_products_desc;
                 }
-                
+
                 // Products out of stock in Live Api - Discontinued
                 const discontinued = document.querySelector("#discontinued-checkboxes");
                 discontinued.innerHTML = "";
-                
+
                 // Use a Set to store unique product titles
                 const uniqueTitles = new Set();
-                
+
                 products_stock_out.forEach(product => {
 
                     if (product.title) {
