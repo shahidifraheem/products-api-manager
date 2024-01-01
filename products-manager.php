@@ -4,7 +4,7 @@
  * Plugin Name:       Products Manager
  * Description:       This plugin will handle the products through the apis
  * Version:           1.0
- * Author:            Web Central
+ * Author:            Webcentral
  * Author URI:        https://webcentral.io
  * Update URI:        https://github.com/shahidifraheem/products-api-manager
  * Text Domain:       products-manager

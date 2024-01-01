@@ -405,8 +405,6 @@ function fecth_api_manager_code()
                 })
 
                 $("#tab1 select, #tab1 input").on("change", function() {
-
-
                     // Check if #price-increase is selected or blank
                     let isPriceIncreaseSelected = $("#price-increase").val() === null || $("#price-increase").val() === "";
                     let availableSelected = $("#available").val() === null || $("#available").val() === "";
