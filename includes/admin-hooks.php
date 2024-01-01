@@ -454,33 +454,6 @@ function update_discontinued_separate_products()
 
         // Check the discontinued is empty or not
         if (!empty($discontinued_products)) {
-            /* // Loop through the discontinued products to update the titles
-            foreach ($discontinued_products as $product_title) {
-
-                // Query for the product by title
-                $product_query = new WP_Query(array(
-                    'post_type' => 'product',
-                    'posts_per_page' => -1,
-                    'post_status' => 'publish',
-                    'title' => $product_title,
-                ));
-
-                // Check if the product is found
-                if ($product_query->have_posts()) {
-                    while ($product_query->have_posts()) {
-                        $product_query->the_post();
-
-                        // Update the product stock status to 'outofstock'
-                        update_post_meta(get_the_ID(), '_stock_status', 'outofstock');
-
-                        // Optionally, update the product quantity to 0
-                        update_post_meta(get_the_ID(), '_stock', 0);
-                        
-                        echo '<script>alert("' . $product_title . ' marked as out of stock!")</script>';
-                    }
-                }
-            } */
-
             // Loop through the discontinued products to update the stock
             foreach ($discontinued_products as $product_data) {
                 $product = explode('::>', $product_data);
