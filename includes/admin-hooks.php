@@ -349,10 +349,24 @@ function add_missing_products()
 
                                     // Set the uploaded image as the featured image for the product
                                     $attachment_id = wp_insert_attachment(array(
-                                        'post_title' => $filename,
-                                        'post_mime_type' => 'image/jpeg', // Change this based on the image type
-                                        'post_status' => 'inherit',
+                                        'post_title'     => $filename,
+                                        'post_mime_type' => get_mime_type($filename), // Determine MIME type dynamically
+                                        'post_status'    => 'inherit',
                                     ), $uploaded_image_path, $product_id);
+
+                                    // Function to get MIME type based on file extension
+                                    function get_mime_type($filename)
+                                    {
+                                        $file_info = wp_check_filetype($filename);
+
+                                        // If wp_check_filetype returns a valid MIME type, use it
+                                        if ($file_info['type']) {
+                                            return $file_info['type'];
+                                        } else {
+                                            // Fallback to a default MIME type (you can adjust this based on your needs)
+                                            return 'image/jpeg';
+                                        }
+                                    }
 
                                     // Set the featured image
                                     set_post_thumbnail($product_id, $attachment_id);
