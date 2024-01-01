@@ -214,6 +214,7 @@ function fecth_api_discontinued_code()
                 }
 
                 // Common Products from APi and Store - Available
+
                 // Title based products
                 let available_common_products_title = common_products(api_array, products_array, 'title', 'title');
 
