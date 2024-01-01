@@ -190,8 +190,8 @@ function fecth_api_discontinued_code()
 
                 // local products array
                 const products_array = csvToObjectArray(`<?= $csv_data ?>`);
-
                 console.log(products_array);
+
                 // Function to find common sub-arrays based on a specific property
                 function common_products(apiArray, productsArray, api_property, product_property) {
                     return apiArray.filter(apiObj =>
@@ -200,32 +200,32 @@ function fecth_api_discontinued_code()
                 }
 
                 // Common Products from APi and Store - Available
+                // Title based products
                 let available_common_products_title = common_products(api_array, products_array, 'title', 'title');
-                console.log("available_common_products_title: ", available_common_products_title)
-
+                
+                // SKU based products
                 let available_common_products_sku = common_products(api_array, products_array, 'SKU', 'SKU');
-                console.log("available_common_products_sku: ", available_common_products_sku)
-
+                
+                // Description based products
                 let available_common_products_desc = common_products(api_array, products_array, 'description', 'description');
-                console.log("available_common_products_desc: ", available_common_products_desc)
 
-                let products_stock_out = available_common_products_title.filter(product => product['Quantity'] < 1);
+                let products_stock_out = [];
 
                 if (available_common_products_title && available_common_products_title.length > 0) {
-                    console.log("Title")
+                    products_stock_out = available_common_products_title.filter(product => product['Quantity'] < 1);
                 } else if (available_common_products_sku && available_common_products_sku.length > 0) {
-                    console.log("SKU")
+                    products_stock_out = available_common_products_sku;
                 } else {
-                    console.log("Description")
+                    products_stock_out = available_common_products_desc.filter(product => product['Quantity'] < 1);
                 }
-
+                
                 // Products out of stock in Live Api - Discontinued
                 const discontinued = document.querySelector("#discontinued-checkboxes");
                 discontinued.innerHTML = "";
-
+                
                 // Use a Set to store unique product titles
                 const uniqueTitles = new Set();
-
+                
                 products_stock_out.forEach(product => {
 
                     if (product.title) {
@@ -251,8 +251,8 @@ function fecth_api_discontinued_code()
                             // Render the option
                             discontinued.innerHTML += `
                             <div class="input-box">
-                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
-                            <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.description)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
+                            <label for="discontinued-${generate_slug(product.description)}">${product.description}</label>
                             </div>
                             `;
                         }
@@ -265,8 +265,8 @@ function fecth_api_discontinued_code()
                             // Render the option
                             discontinued.innerHTML += `
                             <div class="input-box">
-                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.title)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
-                            <label for="discontinued-${generate_slug(product.title)}">${product.title}</label>
+                            <input type="checkbox" name="discontinued[]" id="discontinued-${generate_slug(product.SKU)}" value="::>${product.title != "" ? product.title : "null"}::>${product.description != "" ? product.description : "null"}::>${product.SKU != "" ? product.SKU : "null"}">
+                            <label for="discontinued-${generate_slug(product.SKU)}">${product.SKU}</label>
                             </div>
                             `;
                         }
