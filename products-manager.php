@@ -60,3 +60,18 @@ function show_admin_notices()
     }
 }
 add_action('admin_notices', 'show_admin_notices');
+
+
+// Function to get MIME type based on file extension
+function get_mime_type($filename)
+{
+    $file_info = wp_check_filetype($filename);
+
+    // If wp_check_filetype returns a valid MIME type, use it
+    if ($file_info['type']) {
+        return $file_info['type'];
+    } else {
+        // Fallback to a default MIME type (you can adjust this based on your needs)
+        return 'image/jpeg';
+    }
+}
